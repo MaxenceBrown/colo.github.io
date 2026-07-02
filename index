@@ -3,126 +3,603 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carnet de colo — Suivi des enfants</title>
+<title>CARNET DE COLO // SUIVI TERRAIN</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   TOKENS
+   ===================================================================== */
+:root{
+  --bg: #05070a;
+  --bg-deep: #020304;
+  --panel: #0c1319;
+  --panel-alt: #101a22;
+  --line: rgba(66, 235, 214, 0.16);
+  --line-strong: rgba(66, 235, 214, 0.4);
+
+  --cyan: #3fe8d6;
+  --cyan-soft: rgba(63, 232, 214, 0.14);
+  --cyan-glow: rgba(63, 232, 214, 0.45);
+
+  --amber: #ffb020;
+  --amber-soft: rgba(255, 176, 32, 0.14);
+
+  --magenta: #ff3b79;
+  --magenta-soft: rgba(255, 59, 121, 0.14);
+  --magenta-glow: rgba(255, 59, 121, 0.5);
+
+  --ok: #34e0a1;
+
+  --text: #dff4f2;
+  --text-dim: #7791a0;
+  --text-faint: #4c6270;
+
+  --font-display: "Orbitron", sans-serif;
+  --font-body: "Rajdhani", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius: 6px;
+}
+
+*{ box-sizing: border-box; }
+
+html,body{
+  margin:0; padding:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+button, input, textarea, select{
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+h1,h2,h3{
+  font-family: var(--font-display);
+  color: var(--text);
+  margin:0;
+  letter-spacing: 0.02em;
+}
+
+::selection{ background: var(--cyan-glow); color: #04100e; }
+
+/* =====================================================================
+   BACKGROUND FX — grid + scanning sweep + vignette
+   ===================================================================== */
+.bg-fx{
+  position: fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(63,232,214,0.09), transparent 55%),
+    radial-gradient(ellipse at 100% 110%, rgba(255,59,121,0.08), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(63,232,214,0.05) 0px, rgba(63,232,214,0.05) 1px, transparent 1px, transparent 42px),
+    repeating-linear-gradient(90deg, rgba(63,232,214,0.05) 0px, rgba(63,232,214,0.05) 1px, transparent 1px, transparent 42px),
+    var(--bg-deep);
+}
+.bg-fx::after{
+  content:"";
+  position:absolute; left:0; right:0; height:140px;
+  background: linear-gradient(180deg, transparent, rgba(63,232,214,0.06), transparent);
+  animation: sweep 9s linear infinite;
+}
+@keyframes sweep{
+  0%{ top: -140px; }
+  100%{ top: 100vh; }
+}
+@media (prefers-reduced-motion: reduce){
+  .bg-fx::after{ animation: none; display:none; }
+}
+
+/* =====================================================================
+   HUD corner brackets — reusable utility
+   ===================================================================== */
+.hud{
+  position: relative;
+  --c: var(--cyan);
+  background-image:
+    linear-gradient(to right, var(--c) 2px, transparent 2px),
+    linear-gradient(to bottom, var(--c) 2px, transparent 2px),
+    linear-gradient(to left, var(--c) 2px, transparent 2px),
+    linear-gradient(to bottom, var(--c) 2px, transparent 2px),
+    linear-gradient(to right, var(--c) 2px, transparent 2px),
+    linear-gradient(to top, var(--c) 2px, transparent 2px),
+    linear-gradient(to left, var(--c) 2px, transparent 2px),
+    linear-gradient(to top, var(--c) 2px, transparent 2px);
+  background-repeat: no-repeat;
+  background-size: 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px;
+  background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
+}
+
+/* =====================================================================
+   LAYOUT
+   ===================================================================== */
+.app{ position:relative; z-index:1; display:flex; flex-direction:column; min-height:100vh; }
+
+/* ---- Top bar ---- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 14px 26px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(12,19,25,0.95), rgba(12,19,25,0.75));
+  backdrop-filter: blur(8px);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand-mark{
+  width: 38px; height:38px; flex-shrink:0;
+  border: 1.5px solid var(--cyan);
+  border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  color: var(--cyan);
+  font-family: var(--font-mono); font-size: 14px; font-weight:600;
+  box-shadow: 0 0 14px var(--cyan-glow), inset 0 0 8px rgba(63,232,214,0.25);
+  animation: pulse-ring 3s ease-in-out infinite;
+}
+@keyframes pulse-ring{
+  0%,100%{ box-shadow: 0 0 10px var(--cyan-glow), inset 0 0 6px rgba(63,232,214,0.2); }
+  50%{ box-shadow: 0 0 20px var(--cyan-glow), inset 0 0 10px rgba(63,232,214,0.35); }
+}
+.brand-text h1{ font-size: 18px; letter-spacing: 0.06em; }
+.brand-text p{
+  margin: 2px 0 0; font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+}
+
+.topbar-right{ display:flex; align-items:center; gap: 22px; flex-wrap: wrap; }
+
+.status-pill{
+  display:flex; align-items:center; gap:8px;
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing:0.05em;
+  color: var(--ok); text-transform: uppercase;
+  padding: 6px 12px; border: 1px solid rgba(52,224,161,0.35); border-radius: 20px;
+  background: rgba(52,224,161,0.06);
+}
+.status-dot{
+  width:7px; height:7px; border-radius:50%; background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+  animation: blink 1.8s ease-in-out infinite;
+}
+@keyframes blink{ 0%,100%{ opacity:1;} 50%{ opacity:0.35;} }
+
+.clock-block{ text-align:right; }
+.clock-time{ font-family: var(--font-mono); font-size: 18px; color: var(--cyan); letter-spacing: 0.04em; }
+.clock-date{ font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.mission-day{
+  font-family: var(--font-mono); font-size: 11px; color: var(--amber);
+  border: 1px solid rgba(255,176,32,0.35); background: var(--amber-soft);
+  padding: 6px 12px; border-radius: 20px; letter-spacing: 0.05em; white-space: nowrap;
+}
+
+/* ---- Body shell ---- */
+.body-shell{ display:flex; flex:1; }
+
+/* ---- Sidebar ---- */
+.side{
+  width: 236px; flex-shrink:0;
+  border-right: 1px solid var(--line);
+  padding: 22px 16px;
+  background: linear-gradient(180deg, rgba(12,19,25,0.6), rgba(5,7,10,0.4));
+}
+.side-label{
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.14em; margin: 0 8px 10px;
+}
+.side-nav{ display:flex; flex-direction:column; gap:10px; }
+
+.nav-btn{
+  text-align:left; cursor:pointer;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 13px;
+  color: var(--text-dim);
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.nav-btn:hover{ border-color: var(--line-strong); color: var(--text); }
+.nav-btn .nav-id{
+  font-family: var(--font-mono); font-size: 10px; color: var(--cyan);
+  letter-spacing: 0.08em; display:block; margin-bottom: 4px;
+}
+.nav-btn .nav-label{ font-weight:700; font-size:14.5px; letter-spacing:0.02em; }
+.nav-btn .nav-meta{
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint);
+  margin-top: 4px;
+}
+.nav-btn.is-active{
+  border-color: var(--cyan);
+  background: linear-gradient(135deg, rgba(63,232,214,0.1), rgba(63,232,214,0.02));
+  color: var(--text);
+  box-shadow: 0 0 16px rgba(63,232,214,0.12);
+}
+.nav-btn.is-active .nav-label{ color: var(--cyan); }
+
+.side-foot{
+  margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint); line-height: 1.6;
+}
+.side-foot b{ color: var(--text-dim); }
+
+/* ---- Main ---- */
+.main{ flex:1; padding: 30px 36px 80px; max-width: 1180px; }
+
+.view{ display:none; }
+.view.is-active{ display:block; animation: fade-in .25s ease; }
+@keyframes fade-in{ from{ opacity:0; transform: translateY(4px);} to{ opacity:1; transform:none; } }
+
+.view-head{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  gap: 18px; flex-wrap: wrap; margin-bottom: 22px;
+}
+.eyebrow{
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--cyan); margin: 0 0 6px;
+}
+.view-head h2{ font-size: 26px; }
+
+.hint{ color: var(--text-dim); font-size: 14px; margin: 0 0 18px; }
+
+/* ---- Buttons ---- */
+.btn{
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor:pointer;
+  display:inline-block;
+  font-family: var(--font-mono);
+  transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
+  border: 1px solid transparent;
+}
+.btn:active{ transform: translateY(1px); }
+
+.btn-primary{
+  background: linear-gradient(135deg, var(--cyan), #21b8a8);
+  color: #04120f;
+  box-shadow: 0 0 0 1px rgba(63,232,214,0.4), 0 0 18px rgba(63,232,214,0.25);
+}
+.btn-primary:hover{ box-shadow: 0 0 0 1px var(--cyan), 0 0 26px rgba(63,232,214,0.45); }
+
+.btn-ghost{
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--line-strong);
+}
+.btn-ghost:hover{ color: var(--text); border-color: var(--cyan); background: var(--cyan-soft); }
+
+.btn-danger{
+  background: transparent; color: var(--magenta);
+  border: 1px solid rgba(255,59,121,0.4);
+  margin-top: 14px;
+}
+.btn-danger:hover{ background: var(--magenta-soft); box-shadow: 0 0 16px rgba(255,59,121,0.25); }
+
+.btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+
+/* ---- Toolbar ---- */
+.toolbar{ display:flex; gap:18px; align-items:center; margin-bottom:22px; flex-wrap:wrap; }
+#search-child{
+  flex:1; min-width: 220px; padding: 11px 14px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: var(--panel); color: var(--text);
+}
+#search-child::placeholder{ color: var(--text-faint); }
+.filter-check{
+  display:flex; align-items:center; gap:8px; font-size:13px;
+  color: var(--text-dim); white-space:nowrap; font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.filter-check input{ width:16px; height:16px; accent-color: var(--magenta); }
+
+/* ---- Children grid ---- */
+.children-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(258px,1fr)); gap:16px; }
+
+.child-card{
+  --c: var(--cyan); --glow: var(--cyan-glow);
+  background: linear-gradient(160deg, var(--panel), var(--bg-deep));
+  border: 1px solid var(--line);
+  padding: 18px 17px 15px;
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .15s ease;
+}
+.child-card:hover{ transform: translateY(-2px); box-shadow: 0 0 22px rgba(63,232,214,0.12); }
+.child-card.has-alert{ --c: var(--magenta); --glow: var(--magenta-glow); }
+.child-card.has-alert:hover{ box-shadow: 0 0 22px rgba(255,59,121,0.18); }
+
+.child-card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.child-name{ font-family: var(--font-display); font-weight:700; font-size:15.5px; letter-spacing:0.01em; margin:0; color: var(--text); }
+.child-group{ font-family: var(--font-mono); font-size:11px; color: var(--text-dim); margin: 4px 0 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.badge{
+  font-family: var(--font-mono); font-size: 10px; letter-spacing:0.04em;
+  padding: 4px 9px; border-radius: 3px; white-space:nowrap; text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.badge-alert{ background: var(--magenta-soft); color: var(--magenta); border-color: rgba(255,59,121,0.4); animation: blink 2.4s ease-in-out infinite; }
+.badge-ok{ background: rgba(52,224,161,0.08); color: var(--ok); border-color: rgba(52,224,161,0.3); }
+
+.child-detail-line{
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim);
+  display:flex; gap:6px; margin-top:6px;
+}
+.child-detail-line b{ color: var(--text); font-weight:600; }
+
+.empty-state{
+  display:none; text-align:center; color: var(--text-dim); padding: 70px 20px;
+  border: 1px dashed var(--line-strong); font-family: var(--font-mono); font-size: 13px;
+}
+
+/* ---- Presences ---- */
+.date-picker{ display:flex; align-items:center; gap:8px; }
+.date-picker input[type="date"]{
+  padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: var(--panel); color: var(--text); font-family: var(--font-mono);
+}
+.date-picker .btn{ padding: 9px 14px; }
+
+.presence-summary{
+  display:flex; gap:26px; margin-bottom:20px;
+  font-family: var(--font-mono); font-size:12px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.presence-summary b{ color: var(--cyan); font-size:19px; display:block; font-family: var(--font-display); }
+
+.presence-list{ display:flex; flex-direction:column; gap:8px; }
+.presence-row{
+  display:flex; align-items:center; gap:14px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 11px 15px;
+  transition: border-color .15s ease;
+}
+.presence-row:has(input:checked){ border-color: rgba(52,224,161,0.4); background: rgba(52,224,161,0.04); }
+.presence-row input[type="checkbox"]{ width:19px; height:19px; accent-color: var(--ok); }
+.presence-row .p-name{ font-weight:700; flex:1; }
+.presence-row .p-group{ font-family: var(--font-mono); font-size:11px; color: var(--text-faint); text-transform:uppercase; }
+
+/* ---- Settings ---- */
+.settings-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:18px; }
+.card-block{
+  background: linear-gradient(160deg, var(--panel), var(--bg-deep));
+  border: 1px solid var(--line); padding: 22px;
+}
+.card-block h3{ font-size:15px; margin-bottom:16px; letter-spacing:0.03em; color: var(--cyan); }
+
+label{
+  display:block; font-family: var(--font-mono); font-size:10.5px; font-weight:600;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing:0.06em; margin-bottom:14px;
+}
+input[type="text"], input[type="date"], input[type="tel"], input[type="search"], textarea, select{
+  display:block; width:100%; margin-top:6px; padding: 10px 12px;
+  border: 1px solid var(--line-strong); border-radius: 4px;
+  background: var(--bg-deep); color: var(--text); font-weight:500; font-family: var(--font-body); font-size: 15px;
+}
+textarea{ resize: vertical; }
+input:focus, textarea:focus, select:focus{ outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(63,232,214,0.15); }
+
+.row-2{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+
+/* ---- Modal ---- */
+.modal-overlay{
+  display:none; position:fixed; inset:0; background: rgba(2,3,4,0.75);
+  backdrop-filter: blur(3px);
+  align-items:center; justify-content:center; padding:24px; z-index:50;
+}
+.modal-overlay.is-open{ display:flex; }
+.modal{
+  background: var(--bg-deep); border: 1px solid var(--line-strong);
+  max-width: 640px; width:100%; max-height:88vh; overflow-y:auto;
+  box-shadow: 0 0 60px rgba(63,232,214,0.15), 0 20px 60px rgba(0,0,0,0.5);
+}
+.modal-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 18px 24px; border-bottom: 1px solid var(--line);
+  position:sticky; top:0; background: var(--bg-deep); z-index:2;
+}
+.modal-head h3{ font-size:15px; letter-spacing:0.03em; color: var(--cyan); }
+.modal-close{ background:transparent; border:1px solid var(--line-strong); color: var(--text-dim); width:30px; height:30px; cursor:pointer; border-radius:4px; }
+.modal-close:hover{ color: var(--magenta); border-color: var(--magenta); }
+.modal-body{ padding: 20px 24px 24px; }
+
+fieldset{ border:none; padding:0; margin:0 0 24px; }
+legend{
+  font-family: var(--font-mono); font-size:10.5px; text-transform:uppercase;
+  letter-spacing:0.1em; color: var(--cyan); margin-bottom:12px; padding:0;
+}
+.fieldset-alert{
+  background: var(--magenta-soft); border: 1px solid rgba(255,59,121,0.3);
+  padding: 16px 16px 4px;
+}
+.fieldset-alert legend{ color: var(--magenta); }
+
+.checkbox-line{ display:flex; align-items:center; gap:9px; font-weight:700; color: var(--text); text-transform:none; font-family: var(--font-body); font-size:14.5px; }
+.checkbox-line input{ width:18px; height:18px; accent-color: var(--magenta); }
+
+.modal-actions{
+  display:flex; justify-content:space-between; align-items:center;
+  border-top: 1px solid var(--line); padding-top:16px; margin-top:6px;
+}
+.modal-actions-right{ display:flex; gap:10px; }
+
+/* ---- Print ---- */
+#print-area{ display:none; }
+@media print{
+  .app{ display:none; }
+  #print-area{ display:block; background:#fff; color:#111; font-family: Arial, sans-serif; }
+  .print-sheet{ page-break-after: always; padding: 20px 0; }
+  .print-alert{ background:#fdecea; border:1px solid #c0392b; border-radius:6px; padding:10px 14px; margin:10px 0; }
+  .print-row{ margin-bottom:8px; font-size:13px; }
+  .print-row b{ display:inline-block; min-width:170px; }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 860px){
+  .body-shell{ flex-direction:column; }
+  .side{ width:auto; border-right:none; border-bottom:1px solid var(--line); }
+  .side-nav{ flex-direction:row; flex-wrap:wrap; }
+  .nav-btn{ flex:1; min-width: 140px; }
+  .side-foot{ display:none; }
+  .main{ padding: 24px 18px 60px; }
+  .row-2{ grid-template-columns: 1fr; }
+  .topbar{ padding: 12px 16px; }
+  .clock-block{ display:none; }
+}
+
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
+  outline: 2px solid var(--cyan); outline-offset: 2px;
+}
+</style>
 </head>
 <body>
 
+<div class="bg-fx"></div>
+
 <div class="app">
 
-  <!-- Barre latérale -->
-  <aside class="side">
-    <div class="side-top">
-      <span class="brand-mark">⛺</span>
-      <h1 class="brand">Carnet<br>de colo</h1>
-    </div>
-    <nav class="side-nav">
-      <button class="nav-btn is-active" data-view="enfants">
-        <span class="nav-num">01</span> Enfants
-      </button>
-      <button class="nav-btn" data-view="presences">
-        <span class="nav-num">02</span> Présences
-      </button>
-      <button class="nav-btn" data-view="reglages">
-        <span class="nav-num">03</span> Séjour &amp; export
-      </button>
-    </nav>
-    <div class="side-bottom">
-      <p class="side-note">Toutes les données restent dans ce navigateur. Pense à exporter régulièrement une sauvegarde.</p>
-    </div>
-  </aside>
-
-  <!-- Contenu principal -->
-  <main class="main">
-
-    <!-- VUE ENFANTS -->
-    <section id="view-enfants" class="view is-active">
-      <header class="view-head">
-        <div>
-          <p class="eyebrow">Fiches individuelles</p>
-          <h2>Les enfants du séjour</h2>
-        </div>
-        <button class="btn btn-primary" id="btn-add-child">+ Ajouter un enfant</button>
-      </header>
-
-      <div class="toolbar">
-        <input type="search" id="search-child" placeholder="Rechercher un nom, un groupe...">
-        <label class="filter-check">
-          <input type="checkbox" id="filter-allergies">
-          Allergies / PAI uniquement
-        </label>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">CDC</div>
+      <div class="brand-text">
+        <h1>CARNET DE COLO</h1>
+        <p>Système de suivi terrain — enfants &amp; présences</p>
       </div>
+    </div>
+    <div class="topbar-right">
+      <span id="mission-day" class="mission-day">SÉJOUR NON CONFIGURÉ</span>
+      <span class="status-pill"><span class="status-dot"></span>Données locales — en ligne</span>
+      <div class="clock-block">
+        <div id="clock-time" class="clock-time">00:00:00</div>
+        <div id="clock-date" class="clock-date">—</div>
+      </div>
+    </div>
+  </header>
 
-      <div id="children-grid" class="children-grid"></div>
-      <p id="empty-state" class="empty-state">Aucun enfant enregistré pour l'instant. Ajoute la première fiche avec le bouton ci-dessus.</p>
-    </section>
+  <div class="body-shell">
 
-    <!-- VUE PRESENCES -->
-    <section id="view-presences" class="view">
-      <header class="view-head">
-        <div>
-          <p class="eyebrow">Feuille du jour</p>
-          <h2>Présences</h2>
-        </div>
-        <div class="date-picker">
-          <button id="date-prev" class="btn btn-ghost" aria-label="Jour précédent">←</button>
-          <input type="date" id="presence-date">
-          <button id="date-next" class="btn btn-ghost" aria-label="Jour suivant">→</button>
-        </div>
-      </header>
-      <p class="hint">Coche les enfants présents. Un enfant non coché est marqué absent pour cette date.</p>
-      <div id="presence-summary" class="presence-summary"></div>
-      <div id="presence-list" class="presence-list"></div>
-    </section>
+    <!-- SIDEBAR -->
+    <aside class="side">
+      <p class="side-label">Modules</p>
+      <nav class="side-nav">
+        <button class="nav-btn is-active" data-view="enfants">
+          <span class="nav-id">01 // BASE</span>
+          <span class="nav-label">Enfants</span>
+          <span class="nav-meta" id="nav-meta-enfants">0 fiche(s)</span>
+        </button>
+        <button class="nav-btn" data-view="presences">
+          <span class="nav-id">02 // POINTAGE</span>
+          <span class="nav-label">Présences</span>
+          <span class="nav-meta" id="nav-meta-presences">—</span>
+        </button>
+        <button class="nav-btn" data-view="reglages">
+          <span class="nav-id">03 // SYSTÈME</span>
+          <span class="nav-label">Séjour &amp; export</span>
+          <span class="nav-meta">Sauvegarde locale</span>
+        </button>
+      </nav>
+      <div class="side-foot">
+        <b>⚠ Stockage local</b><br>
+        Toutes les données restent dans ce navigateur. Exporte une sauvegarde régulièrement.
+      </div>
+    </aside>
 
-    <!-- VUE REGLAGES / EXPORT -->
-    <section id="view-reglages" class="view">
-      <header class="view-head">
-        <div>
-          <p class="eyebrow">Paramètres</p>
-          <h2>Séjour &amp; export</h2>
-        </div>
-      </header>
+    <!-- MAIN -->
+    <main class="main">
 
-      <div class="settings-grid">
-        <div class="card-block">
-          <h3>Informations du séjour</h3>
-          <label>Nom du séjour
-            <input type="text" id="camp-name" placeholder="Colo été 2026 — Les Sapins">
+      <!-- VUE ENFANTS -->
+      <section id="view-enfants" class="view is-active">
+        <header class="view-head">
+          <div>
+            <p class="eyebrow">Base de données — fiches individuelles</p>
+            <h2>Les enfants du séjour</h2>
+          </div>
+          <button class="btn btn-primary" id="btn-add-child">+ Nouvelle fiche</button>
+        </header>
+
+        <div class="toolbar">
+          <input type="search" id="search-child" placeholder="Rechercher un nom, un groupe...">
+          <label class="filter-check">
+            <input type="checkbox" id="filter-allergies">
+            Allergies / PAI uniquement
           </label>
-          <div class="row-2">
-            <label>Date de début
-              <input type="date" id="camp-start">
-            </label>
-            <label>Date de fin
-              <input type="date" id="camp-end">
-            </label>
+        </div>
+
+        <div id="children-grid" class="children-grid"></div>
+        <p id="empty-state" class="empty-state hud">Aucun enfant enregistré. Ajoute la première fiche avec le bouton ci-dessus.</p>
+      </section>
+
+      <!-- VUE PRESENCES -->
+      <section id="view-presences" class="view">
+        <header class="view-head">
+          <div>
+            <p class="eyebrow">Pointage — feuille du jour</p>
+            <h2>Présences</h2>
           </div>
-          <button class="btn btn-primary" id="btn-save-camp">Enregistrer</button>
-        </div>
-
-        <div class="card-block">
-          <h3>Sauvegarde des données</h3>
-          <p class="hint">Les données ne vivent que dans ce navigateur. Exporte un fichier de sauvegarde régulièrement, surtout avant de changer d'appareil.</p>
-          <div class="btn-row">
-            <button class="btn btn-primary" id="btn-export">Exporter (.json)</button>
-            <label class="btn btn-ghost" for="import-file">Importer un fichier</label>
-            <input type="file" id="import-file" accept="application/json" hidden>
+          <div class="date-picker">
+            <button id="date-prev" class="btn btn-ghost" aria-label="Jour précédent">←</button>
+            <input type="date" id="presence-date">
+            <button id="date-next" class="btn btn-ghost" aria-label="Jour suivant">→</button>
           </div>
-          <button class="btn btn-danger" id="btn-reset">Effacer toutes les données</button>
-        </div>
+        </header>
+        <p class="hint">Coche les enfants présents. Un enfant non coché est marqué absent pour cette date.</p>
+        <div id="presence-summary" class="presence-summary"></div>
+        <div id="presence-list" class="presence-list"></div>
+      </section>
 
-        <div class="card-block">
-          <h3>Impression</h3>
-          <p class="hint">Génère les fiches sanitaires de tous les enfants, prêtes à imprimer pour l'équipe d'encadrement.</p>
-          <button class="btn btn-primary" id="btn-print-all">Imprimer toutes les fiches</button>
-        </div>
-      </div>
-    </section>
+      <!-- VUE REGLAGES -->
+      <section id="view-reglages" class="view">
+        <header class="view-head">
+          <div>
+            <p class="eyebrow">Paramètres système</p>
+            <h2>Séjour &amp; export</h2>
+          </div>
+        </header>
 
-  </main>
+        <div class="settings-grid">
+          <div class="card-block hud">
+            <h3>Informations du séjour</h3>
+            <label>Nom du séjour
+              <input type="text" id="camp-name" placeholder="Colo été 2026 — Les Sapins">
+            </label>
+            <div class="row-2">
+              <label>Date de début
+                <input type="date" id="camp-start">
+              </label>
+              <label>Date de fin
+                <input type="date" id="camp-end">
+              </label>
+            </div>
+            <button class="btn btn-primary" id="btn-save-camp">Enregistrer</button>
+          </div>
+
+          <div class="card-block hud">
+            <h3>Sauvegarde des données</h3>
+            <p class="hint">Les données ne vivent que dans ce navigateur. Exporte un fichier de sauvegarde régulièrement.</p>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="btn-export">Exporter (.json)</button>
+              <label class="btn btn-ghost" for="import-file">Importer</label>
+              <input type="file" id="import-file" accept="application/json" hidden>
+            </div>
+            <button class="btn btn-danger" id="btn-reset">Effacer toutes les données</button>
+          </div>
+
+          <div class="card-block hud">
+            <h3>Impression</h3>
+            <p class="hint">Génère les fiches sanitaires de tous les enfants, prêtes à imprimer pour l'équipe.</p>
+            <button class="btn btn-primary" id="btn-print-all">Imprimer toutes les fiches</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
 </div>
 
 <!-- MODALE FICHE ENFANT -->
@@ -202,16 +679,388 @@
         <button type="button" class="btn btn-ghost" id="btn-delete-child">Supprimer cette fiche</button>
         <div class="modal-actions-right">
           <button type="button" class="btn btn-ghost" id="btn-cancel">Annuler</button>
-          <button type="submit" class="btn btn-primary">Enregistrer la fiche</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
         </div>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ZONE D'IMPRESSION (générée dynamiquement) -->
 <div id="print-area"></div>
 
-<script src="js/app.js"></script>
+<script>
+/* ============================================================
+   Carnet de colo — logique applicative (localStorage uniquement)
+   ============================================================ */
+const STORAGE_KEY = "colo-suivi:data:v1";
+
+function loadData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return { children: [], presences: {}, camp: { name:"", start:"", end:"" } };
+  try{
+    const p = JSON.parse(raw);
+    return { children: p.children||[], presences: p.presences||{}, camp: p.camp||{name:"",start:"",end:""} };
+  }catch(e){
+    console.error("Données locales illisibles, réinitialisation.", e);
+    return { children: [], presences: {}, camp: { name:"", start:"", end:"" } };
+  }
+}
+function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+let state = loadData();
+
+/* ---------------- Navigation ---------------- */
+const navButtons = document.querySelectorAll(".nav-btn");
+const views = document.querySelectorAll(".view");
+navButtons.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    navButtons.forEach(b=>b.classList.remove("is-active"));
+    views.forEach(v=>v.classList.remove("is-active"));
+    btn.classList.add("is-active");
+    document.getElementById("view-"+btn.dataset.view).classList.add("is-active");
+    if(btn.dataset.view==="presences") renderPresences();
+  });
+});
+
+/* ---------------- Utilitaires ---------------- */
+function uid(){ return "c_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function formatDateFR(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
+function ageFromBirth(iso){
+  if(!iso) return null;
+  const b=new Date(iso), n=new Date();
+  let age=n.getFullYear()-b.getFullYear();
+  const m=n.getMonth()-b.getMonth();
+  if(m<0||(m===0&&n.getDate()<b.getDate())) age--;
+  return age;
+}
+function escapeHtml(str){
+  if(!str) return "";
+  return str.replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
+}
+
+/* ---------------- Horloge de mission ---------------- */
+function tickClock(){
+  const now = new Date();
+  document.getElementById("clock-time").textContent = now.toLocaleTimeString("fr-FR");
+  document.getElementById("clock-date").textContent = now.toLocaleDateString("fr-FR", { weekday:"short", day:"2-digit", month:"short", year:"numeric" }).toUpperCase();
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+function renderMissionDay(){
+  const el = document.getElementById("mission-day");
+  const { start, end } = state.camp;
+  if(!start){ el.textContent = "SÉJOUR NON CONFIGURÉ"; return; }
+  const today = new Date(todayISO());
+  const s = new Date(start);
+  const dayNum = Math.floor((today - s) / 86400000) + 1;
+  if(end){
+    const e = new Date(end);
+    const totalDays = Math.floor((e - s) / 86400000) + 1;
+    if(dayNum < 1) el.textContent = `DÉPART DANS ${1 - dayNum} J`;
+    else if(dayNum > totalDays) el.textContent = `SÉJOUR TERMINÉ — J+${dayNum - totalDays}`;
+    else el.textContent = `JOUR DE SÉJOUR ${dayNum} / ${totalDays}`;
+  } else {
+    el.textContent = dayNum >= 1 ? `JOUR DE SÉJOUR ${dayNum}` : `DÉPART DANS ${1 - dayNum} J`;
+  }
+}
+
+/* ============================================================
+   VUE ENFANTS
+   ============================================================ */
+const grid = document.getElementById("children-grid");
+const emptyState = document.getElementById("empty-state");
+const searchInput = document.getElementById("search-child");
+const filterAllergies = document.getElementById("filter-allergies");
+
+function renderChildren(){
+  const query = searchInput.value.trim().toLowerCase();
+  const onlyAlert = filterAllergies.checked;
+
+  const list = state.children
+    .filter(c=>{
+      const matchesQuery = !query || `${c.prenom} ${c.nom} ${c.groupe}`.toLowerCase().includes(query);
+      const matchesAlert = !onlyAlert || c.hasAllergie;
+      return matchesQuery && matchesAlert;
+    })
+    .sort((a,b)=>a.prenom.localeCompare(b.prenom,"fr"));
+
+  grid.innerHTML = "";
+
+  if(state.children.length===0){
+    emptyState.style.display="block";
+    emptyState.textContent="Aucun enfant enregistré. Ajoute la première fiche avec le bouton ci-dessus.";
+  } else if(list.length===0){
+    emptyState.style.display="block";
+    emptyState.textContent="Aucune fiche ne correspond à ta recherche.";
+  } else {
+    emptyState.style.display="none";
+  }
+
+  list.forEach(c=>{
+    const card=document.createElement("div");
+    card.className="child-card hud"+(c.hasAllergie?" has-alert":"");
+    const age=ageFromBirth(c.naissance);
+    card.innerHTML=`
+      <div class="child-card-top">
+        <div>
+          <p class="child-name">${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</p>
+          <p class="child-group">${escapeHtml(c.groupe||"Groupe non renseigné")}${age!==null?" · "+age+" ans":""}</p>
+        </div>
+        <span class="badge ${c.hasAllergie?"badge-alert":"badge-ok"}">
+          ${c.hasAllergie?"⚠ Allergie / PAI":"RAS"}
+        </span>
+      </div>
+      ${c.contactNom?`<div class="child-detail-line"><b>Urgence :</b> ${escapeHtml(c.contactNom)} ${c.contactTel?"· "+escapeHtml(c.contactTel):""}</div>`:""}
+      ${c.regime?`<div class="child-detail-line"><b>Régime :</b> ${escapeHtml(c.regime)}</div>`:""}
+    `;
+    card.addEventListener("click", ()=>openChildModal(c.id));
+    grid.appendChild(card);
+  });
+
+  document.getElementById("nav-meta-enfants").textContent = `${state.children.length} fiche(s)`;
+}
+
+searchInput.addEventListener("input", renderChildren);
+filterAllergies.addEventListener("change", renderChildren);
+
+/* ---------------- Modale fiche enfant ---------------- */
+const modal = document.getElementById("modal-child");
+const form = document.getElementById("child-form");
+const modalTitle = document.getElementById("modal-title");
+const btnDelete = document.getElementById("btn-delete-child");
+
+document.getElementById("btn-add-child").addEventListener("click", ()=>openChildModal(null));
+document.getElementById("modal-close").addEventListener("click", closeModal);
+document.getElementById("btn-cancel").addEventListener("click", closeModal);
+modal.addEventListener("click", e=>{ if(e.target===modal) closeModal(); });
+
+function openChildModal(id){
+  form.reset();
+  if(id){
+    const c = state.children.find(x=>x.id===id);
+    modalTitle.textContent = `Fiche de ${c.prenom} ${c.nom}`;
+    document.getElementById("child-id").value = c.id;
+    document.getElementById("f-prenom").value = c.prenom||"";
+    document.getElementById("f-nom").value = c.nom||"";
+    document.getElementById("f-naissance").value = c.naissance||"";
+    document.getElementById("f-groupe").value = c.groupe||"";
+    document.getElementById("f-contact-nom").value = c.contactNom||"";
+    document.getElementById("f-contact-tel").value = c.contactTel||"";
+    document.getElementById("f-has-allergie").checked = !!c.hasAllergie;
+    document.getElementById("f-allergie-detail").value = c.allergieDetail||"";
+    document.getElementById("f-traitement").value = c.traitement||"";
+    document.getElementById("f-regime").value = c.regime||"";
+    document.getElementById("f-vaccins").value = c.vaccins||"ne-sait-pas";
+    document.getElementById("f-notes").value = c.notes||"";
+    btnDelete.style.display="inline-block";
+  } else {
+    modalTitle.textContent = "Nouvelle fiche enfant";
+    document.getElementById("child-id").value = "";
+    btnDelete.style.display="none";
+  }
+  modal.classList.add("is-open");
+}
+function closeModal(){ modal.classList.remove("is-open"); }
+
+form.addEventListener("submit", e=>{
+  e.preventDefault();
+  const id = document.getElementById("child-id").value || uid();
+  const child = {
+    id,
+    prenom: document.getElementById("f-prenom").value.trim(),
+    nom: document.getElementById("f-nom").value.trim(),
+    naissance: document.getElementById("f-naissance").value,
+    groupe: document.getElementById("f-groupe").value.trim(),
+    contactNom: document.getElementById("f-contact-nom").value.trim(),
+    contactTel: document.getElementById("f-contact-tel").value.trim(),
+    hasAllergie: document.getElementById("f-has-allergie").checked,
+    allergieDetail: document.getElementById("f-allergie-detail").value.trim(),
+    traitement: document.getElementById("f-traitement").value.trim(),
+    regime: document.getElementById("f-regime").value.trim(),
+    vaccins: document.getElementById("f-vaccins").value,
+    notes: document.getElementById("f-notes").value.trim()
+  };
+  const idx = state.children.findIndex(c=>c.id===id);
+  if(idx>=0) state.children[idx]=child; else state.children.push(child);
+  saveData();
+  renderChildren();
+  closeModal();
+});
+
+btnDelete.addEventListener("click", ()=>{
+  const id = document.getElementById("child-id").value;
+  if(!id) return;
+  if(!confirm("Supprimer définitivement cette fiche ? Cette action est irréversible.")) return;
+  state.children = state.children.filter(c=>c.id!==id);
+  delete state.presences[id];
+  saveData();
+  renderChildren();
+  closeModal();
+});
+
+/* ============================================================
+   VUE PRESENCES
+   ============================================================ */
+const dateInput = document.getElementById("presence-date");
+const presenceList = document.getElementById("presence-list");
+const presenceSummary = document.getElementById("presence-summary");
+
+dateInput.value = todayISO();
+dateInput.addEventListener("change", renderPresences);
+document.getElementById("date-prev").addEventListener("click", ()=>shiftDate(-1));
+document.getElementById("date-next").addEventListener("click", ()=>shiftDate(1));
+
+function shiftDate(delta){
+  const d = new Date(dateInput.value || todayISO());
+  d.setDate(d.getDate()+delta);
+  dateInput.value = d.toISOString().slice(0,10);
+  renderPresences();
+}
+
+function renderPresences(){
+  const date = dateInput.value || todayISO();
+  presenceList.innerHTML = "";
+
+  if(state.children.length===0){
+    presenceList.innerHTML = `<p class="hint">Ajoute d'abord des enfants dans le module 01.</p>`;
+    presenceSummary.innerHTML = "";
+    document.getElementById("nav-meta-presences").textContent = "—";
+    return;
+  }
+
+  const sorted = [...state.children].sort((a,b)=>a.prenom.localeCompare(b.prenom,"fr"));
+  let presentCount = 0;
+
+  sorted.forEach(c=>{
+    const isPresent = state.presences[c.id] && state.presences[c.id][date];
+    if(isPresent) presentCount++;
+    const row = document.createElement("label");
+    row.className = "presence-row";
+    row.innerHTML = `
+      <input type="checkbox" ${isPresent?"checked":""} data-child="${c.id}">
+      <span class="p-name">${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</span>
+      <span class="p-group">${escapeHtml(c.groupe||"")}</span>
+      ${c.hasAllergie?'<span class="badge badge-alert">⚠</span>':""}
+    `;
+    row.querySelector("input").addEventListener("change", e=>{
+      if(!state.presences[c.id]) state.presences[c.id]={};
+      state.presences[c.id][date] = e.target.checked;
+      saveData();
+      renderPresences();
+    });
+    presenceList.appendChild(row);
+  });
+
+  presenceSummary.innerHTML = `
+    <span><b>${presentCount}</b>présent(s)</span>
+    <span><b>${sorted.length-presentCount}</b>absent(s)</span>
+    <span><b>${sorted.length}</b>au total</span>
+  `;
+  document.getElementById("nav-meta-presences").textContent = `${presentCount}/${sorted.length} présent(s)`;
+}
+
+/* ============================================================
+   VUE REGLAGES / EXPORT
+   ============================================================ */
+document.getElementById("camp-name").value = state.camp.name||"";
+document.getElementById("camp-start").value = state.camp.start||"";
+document.getElementById("camp-end").value = state.camp.end||"";
+
+document.getElementById("btn-save-camp").addEventListener("click", ()=>{
+  state.camp = {
+    name: document.getElementById("camp-name").value.trim(),
+    start: document.getElementById("camp-start").value,
+    end: document.getElementById("camp-end").value
+  };
+  saveData();
+  renderMissionDay();
+  alert("Informations du séjour enregistrées.");
+});
+
+document.getElementById("btn-export").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `carnet-de-colo-sauvegarde-${todayISO()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("import-file").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const imported = JSON.parse(reader.result);
+      if(!imported.children) throw new Error("Format invalide");
+      if(!confirm("Importer ce fichier remplacera toutes les données actuelles. Continuer ?")) return;
+      state = {
+        children: imported.children||[],
+        presences: imported.presences||{},
+        camp: imported.camp||{name:"",start:"",end:""}
+      };
+      saveData();
+      renderChildren();
+      renderPresences();
+      renderMissionDay();
+      document.getElementById("camp-name").value = state.camp.name||"";
+      document.getElementById("camp-start").value = state.camp.start||"";
+      document.getElementById("camp-end").value = state.camp.end||"";
+      alert("Import réussi.");
+    }catch(err){
+      alert("Impossible de lire ce fichier : "+err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+document.getElementById("btn-reset").addEventListener("click", ()=>{
+  if(!confirm("Effacer TOUTES les données (enfants, présences, réglages) ? Cette action est irréversible.")) return;
+  if(!confirm("Dernière confirmation : es-tu sûr(e) ? Pense à exporter une sauvegarde avant si besoin.")) return;
+  state = { children:[], presences:{}, camp:{name:"",start:"",end:""} };
+  saveData();
+  renderChildren();
+  renderPresences();
+  renderMissionDay();
+  document.getElementById("camp-name").value = "";
+  document.getElementById("camp-start").value = "";
+  document.getElementById("camp-end").value = "";
+});
+
+/* ============================================================
+   IMPRESSION DES FICHES SANITAIRES
+   ============================================================ */
+document.getElementById("btn-print-all").addEventListener("click", ()=>{
+  const printArea = document.getElementById("print-area");
+  if(state.children.length===0){ alert("Aucun enfant à imprimer."); return; }
+  const sorted = [...state.children].sort((a,b)=>a.prenom.localeCompare(b.prenom,"fr"));
+  printArea.innerHTML = sorted.map(c=>`
+    <div class="print-sheet">
+      <h2>${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</h2>
+      <div class="print-row"><b>Groupe :</b> ${escapeHtml(c.groupe||"—")}</div>
+      <div class="print-row"><b>Date de naissance :</b> ${c.naissance?formatDateFR(c.naissance):"—"}</div>
+      <div class="print-row"><b>Contact d'urgence :</b> ${escapeHtml(c.contactNom||"—")} ${c.contactTel?"· "+escapeHtml(c.contactTel):""}</div>
+      <div class="print-row"><b>Régime alimentaire :</b> ${escapeHtml(c.regime||"Aucun signalé")}</div>
+      <div class="print-row"><b>Vaccinations à jour :</b> ${c.vaccins==="oui"?"Oui":c.vaccins==="non"?"Non":"Non renseigné"}</div>
+      <div class="print-row"><b>Traitement en cours :</b> ${escapeHtml(c.traitement||"Aucun")}</div>
+      ${c.hasAllergie?`<div class="print-alert"><b>⚠ Allergie / PAI</b><br>${escapeHtml(c.allergieDetail||"Détails non renseignés — vérifier avec la famille.")}</div>`:""}
+      ${c.notes?`<div class="print-row"><b>Remarques :</b> ${escapeHtml(c.notes)}</div>`:""}
+    </div>
+  `).join("");
+  window.print();
+});
+
+/* ============================================================
+   Initialisation
+   ============================================================ */
+renderChildren();
+renderPresences();
+renderMissionDay();
+</script>
 </body>
 </html>
