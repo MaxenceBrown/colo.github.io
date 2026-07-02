@@ -3,43 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CARNET DE COLO // SUIVI TERRAIN</title>
+<title>Carnet de colo — suivi des enfants</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* =====================================================================
-   TOKENS
+   TOKENS — palette bleue, sobre
    ===================================================================== */
 :root{
-  --bg: #05070a;
-  --bg-deep: #020304;
-  --panel: #0c1319;
-  --panel-alt: #101a22;
-  --line: rgba(66, 235, 214, 0.16);
-  --line-strong: rgba(66, 235, 214, 0.4);
+  --bg: #0A1220;
+  --bg-deep: #060B14;
+  --panel: #101A2C;
+  --panel-alt: #14213A;
+  --line: rgba(110,160,230,0.14);
+  --line-strong: rgba(110,160,230,0.32);
 
-  --cyan: #3fe8d6;
-  --cyan-soft: rgba(63, 232, 214, 0.14);
-  --cyan-glow: rgba(63, 232, 214, 0.45);
+  --blue: #4E8FFF;
+  --blue-soft: rgba(78,143,255,0.10);
+  --blue-glow: rgba(78,143,255,0.28);
+  --sky: #8FC1FF;
 
-  --amber: #ffb020;
-  --amber-soft: rgba(255, 176, 32, 0.14);
+  --alert: #E2574C;
+  --alert-soft: rgba(226,87,76,0.12);
+  --alert-line: rgba(226,87,76,0.4);
 
-  --magenta: #ff3b79;
-  --magenta-soft: rgba(255, 59, 121, 0.14);
-  --magenta-glow: rgba(255, 59, 121, 0.5);
+  --ok: #3DD68C;
+  --ok-soft: rgba(61,214,140,0.1);
 
-  --ok: #34e0a1;
+  --text: #E8EFFB;
+  --text-dim: #8CA0C2;
+  --text-faint: #526180;
 
-  --text: #dff4f2;
-  --text-dim: #7791a0;
-  --text-faint: #4c6270;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 
-  --font-display: "Orbitron", sans-serif;
-  --font-body: "Rajdhani", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
-
-  --radius: 6px;
+  --radius: 8px;
 }
 
 *{ box-sizing: border-box; }
@@ -49,59 +48,34 @@ html,body{
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15.5px;
   line-height: 1.5;
   min-height: 100vh;
 }
-
-button, input, textarea, select{
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-}
-
-h1,h2,h3{
-  font-family: var(--font-display);
-  color: var(--text);
-  margin:0;
-  letter-spacing: 0.02em;
-}
-
-::selection{ background: var(--cyan-glow); color: #04100e; }
+button, input, textarea, select{ font-family: inherit; font-size: inherit; color: inherit; }
+h1,h2,h3{ font-family: var(--font-display); color: var(--text); margin:0; }
+::selection{ background: var(--blue-glow); color: #06111f; }
+a{ color: var(--sky); }
 
 /* =====================================================================
-   BACKGROUND FX — grid + scanning sweep + vignette
+   Fond — grille discrète, statique
    ===================================================================== */
 .bg-fx{
   position: fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse at 20% -10%, rgba(63,232,214,0.09), transparent 55%),
-    radial-gradient(ellipse at 100% 110%, rgba(255,59,121,0.08), transparent 55%),
-    repeating-linear-gradient(0deg, rgba(63,232,214,0.05) 0px, rgba(63,232,214,0.05) 1px, transparent 1px, transparent 42px),
-    repeating-linear-gradient(90deg, rgba(63,232,214,0.05) 0px, rgba(63,232,214,0.05) 1px, transparent 1px, transparent 42px),
+    radial-gradient(ellipse at 15% -10%, rgba(78,143,255,0.08), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(78,143,255,0.05), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(110,160,230,0.035) 0px, rgba(110,160,230,0.035) 1px, transparent 1px, transparent 46px),
+    repeating-linear-gradient(90deg, rgba(110,160,230,0.035) 0px, rgba(110,160,230,0.035) 1px, transparent 1px, transparent 46px),
     var(--bg-deep);
-}
-.bg-fx::after{
-  content:"";
-  position:absolute; left:0; right:0; height:140px;
-  background: linear-gradient(180deg, transparent, rgba(63,232,214,0.06), transparent);
-  animation: sweep 9s linear infinite;
-}
-@keyframes sweep{
-  0%{ top: -140px; }
-  100%{ top: 100vh; }
-}
-@media (prefers-reduced-motion: reduce){
-  .bg-fx::after{ animation: none; display:none; }
 }
 
 /* =====================================================================
-   HUD corner brackets — reusable utility
+   Utilitaire "cadre" — coins discrets, réservé aux panneaux principaux
    ===================================================================== */
-.hud{
+.frame{
   position: relative;
-  --c: var(--cyan);
+  --c: var(--blue-glow);
   background-image:
     linear-gradient(to right, var(--c) 2px, transparent 2px),
     linear-gradient(to bottom, var(--c) 2px, transparent 2px),
@@ -112,7 +86,7 @@ h1,h2,h3{
     linear-gradient(to left, var(--c) 2px, transparent 2px),
     linear-gradient(to top, var(--c) 2px, transparent 2px);
   background-repeat: no-repeat;
-  background-size: 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px;
+  background-size: 10px 2px, 2px 10px, 10px 2px, 2px 10px, 10px 2px, 2px 10px, 10px 2px, 2px 10px;
   background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
 }
 
@@ -121,79 +95,63 @@ h1,h2,h3{
    ===================================================================== */
 .app{ position:relative; z-index:1; display:flex; flex-direction:column; min-height:100vh; }
 
-/* ---- Top bar ---- */
 .topbar{
   display:flex; align-items:center; justify-content:space-between;
-  padding: 14px 26px;
+  padding: 16px 28px;
   border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(12,19,25,0.95), rgba(12,19,25,0.75));
+  background: linear-gradient(180deg, rgba(16,26,44,0.9), rgba(16,26,44,0.6));
   backdrop-filter: blur(8px);
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 20px; flex-wrap: wrap;
 }
-.brand{ display:flex; align-items:center; gap:12px; }
+.brand{ display:flex; align-items:center; gap:13px; }
 .brand-mark{
   width: 38px; height:38px; flex-shrink:0;
-  border: 1.5px solid var(--cyan);
-  border-radius: 50%;
+  border: 1.5px solid var(--blue);
+  border-radius: 10px;
   display:flex; align-items:center; justify-content:center;
-  color: var(--cyan);
-  font-family: var(--font-mono); font-size: 14px; font-weight:600;
-  box-shadow: 0 0 14px var(--cyan-glow), inset 0 0 8px rgba(63,232,214,0.25);
-  animation: pulse-ring 3s ease-in-out infinite;
+  color: var(--blue); background: var(--blue-soft);
+  font-family: var(--font-display); font-size: 15px; font-weight:700;
 }
-@keyframes pulse-ring{
-  0%,100%{ box-shadow: 0 0 10px var(--cyan-glow), inset 0 0 6px rgba(63,232,214,0.2); }
-  50%{ box-shadow: 0 0 20px var(--cyan-glow), inset 0 0 10px rgba(63,232,214,0.35); }
-}
-.brand-text h1{ font-size: 18px; letter-spacing: 0.06em; }
+.brand-text h1{ font-size: 18px; letter-spacing: 0.01em; font-weight: 700; }
 .brand-text p{
   margin: 2px 0 0; font-family: var(--font-mono); font-size: 10.5px;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
 }
 
-.topbar-right{ display:flex; align-items:center; gap: 22px; flex-wrap: wrap; }
+.topbar-right{ display:flex; align-items:center; gap: 20px; flex-wrap: wrap; }
 
 .status-pill{
   display:flex; align-items:center; gap:8px;
-  font-family: var(--font-mono); font-size: 11.5px; letter-spacing:0.05em;
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing:0.03em;
   color: var(--ok); text-transform: uppercase;
-  padding: 6px 12px; border: 1px solid rgba(52,224,161,0.35); border-radius: 20px;
-  background: rgba(52,224,161,0.06);
+  padding: 6px 12px; border: 1px solid rgba(61,214,140,0.3); border-radius: 20px;
+  background: var(--ok-soft);
 }
-.status-dot{
-  width:7px; height:7px; border-radius:50%; background: var(--ok);
-  box-shadow: 0 0 8px var(--ok);
-  animation: blink 1.8s ease-in-out infinite;
-}
-@keyframes blink{ 0%,100%{ opacity:1;} 50%{ opacity:0.35;} }
+.status-dot{ width:6px; height:6px; border-radius:50%; background: var(--ok); }
 
 .clock-block{ text-align:right; }
-.clock-time{ font-family: var(--font-mono); font-size: 18px; color: var(--cyan); letter-spacing: 0.04em; }
-.clock-date{ font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+.clock-time{ font-family: var(--font-mono); font-size: 17px; color: var(--sky); }
+.clock-date{ font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
 
 .mission-day{
-  font-family: var(--font-mono); font-size: 11px; color: var(--amber);
-  border: 1px solid rgba(255,176,32,0.35); background: var(--amber-soft);
-  padding: 6px 12px; border-radius: 20px; letter-spacing: 0.05em; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 11px; color: var(--sky);
+  border: 1px solid var(--line-strong); background: var(--blue-soft);
+  padding: 6px 12px; border-radius: 20px; letter-spacing: 0.03em; white-space: nowrap;
 }
 
-/* ---- Body shell ---- */
 .body-shell{ display:flex; flex:1; }
 
-/* ---- Sidebar ---- */
 .side{
-  width: 236px; flex-shrink:0;
+  width: 224px; flex-shrink:0;
   border-right: 1px solid var(--line);
   padding: 22px 16px;
-  background: linear-gradient(180deg, rgba(12,19,25,0.6), rgba(5,7,10,0.4));
+  background: linear-gradient(180deg, rgba(16,26,44,0.4), rgba(6,11,20,0.2));
 }
 .side-label{
   font-family: var(--font-mono); font-size: 10px; color: var(--text-faint);
-  text-transform: uppercase; letter-spacing: 0.14em; margin: 0 8px 10px;
+  text-transform: uppercase; letter-spacing: 0.12em; margin: 0 8px 10px;
 }
 .side-nav{ display:flex; flex-direction:column; gap:10px; }
-
 .nav-btn{
   text-align:left; cursor:pointer;
   background: var(--panel);
@@ -204,22 +162,15 @@ h1,h2,h3{
   transition: border-color .15s ease, color .15s ease, background .15s ease;
 }
 .nav-btn:hover{ border-color: var(--line-strong); color: var(--text); }
-.nav-btn .nav-id{
-  font-family: var(--font-mono); font-size: 10px; color: var(--cyan);
-  letter-spacing: 0.08em; display:block; margin-bottom: 4px;
-}
-.nav-btn .nav-label{ font-weight:700; font-size:14.5px; letter-spacing:0.02em; }
-.nav-btn .nav-meta{
-  font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint);
-  margin-top: 4px;
-}
+.nav-btn .nav-id{ font-family: var(--font-mono); font-size: 10px; color: var(--blue); letter-spacing: 0.06em; display:block; margin-bottom: 4px; }
+.nav-btn .nav-label{ font-weight:700; font-size:14.5px; }
+.nav-btn .nav-meta{ font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint); margin-top: 4px; }
 .nav-btn.is-active{
-  border-color: var(--cyan);
-  background: linear-gradient(135deg, rgba(63,232,214,0.1), rgba(63,232,214,0.02));
+  border-color: var(--blue);
+  background: linear-gradient(135deg, rgba(78,143,255,0.1), rgba(78,143,255,0.02));
   color: var(--text);
-  box-shadow: 0 0 16px rgba(63,232,214,0.12);
 }
-.nav-btn.is-active .nav-label{ color: var(--cyan); }
+.nav-btn.is-active .nav-label{ color: var(--sky); }
 
 .side-foot{
   margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line);
@@ -227,206 +178,168 @@ h1,h2,h3{
 }
 .side-foot b{ color: var(--text-dim); }
 
-/* ---- Main ---- */
 .main{ flex:1; padding: 30px 36px 80px; max-width: 1180px; }
 
 .view{ display:none; }
-.view.is-active{ display:block; animation: fade-in .25s ease; }
+.view.is-active{ display:block; animation: fade-in .2s ease; }
 @keyframes fade-in{ from{ opacity:0; transform: translateY(4px);} to{ opacity:1; transform:none; } }
 
-.view-head{
-  display:flex; justify-content:space-between; align-items:flex-end;
-  gap: 18px; flex-wrap: wrap; margin-bottom: 22px;
-}
-.eyebrow{
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--cyan); margin: 0 0 6px;
-}
-.view-head h2{ font-size: 26px; }
-
-.hint{ color: var(--text-dim); font-size: 14px; margin: 0 0 18px; }
+.view-head{ display:flex; justify-content:space-between; align-items:flex-end; gap: 18px; flex-wrap: wrap; margin-bottom: 20px; }
+.eyebrow{ font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin: 0 0 6px; }
+.view-head h2{ font-size: 25px; }
+.hint{ color: var(--text-dim); font-size: 13.5px; margin: 0 0 18px; }
 
 /* ---- Buttons ---- */
 .btn{
-  border-radius: var(--radius);
-  padding: 10px 18px;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  cursor:pointer;
-  display:inline-block;
-  font-family: var(--font-mono);
+  border-radius: var(--radius); padding: 10px 18px; font-weight: 600; font-size: 13px;
+  letter-spacing: 0.02em; cursor:pointer; display:inline-block; font-family: var(--font-body);
   transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
   border: 1px solid transparent;
 }
 .btn:active{ transform: translateY(1px); }
-
-.btn-primary{
-  background: linear-gradient(135deg, var(--cyan), #21b8a8);
-  color: #04120f;
-  box-shadow: 0 0 0 1px rgba(63,232,214,0.4), 0 0 18px rgba(63,232,214,0.25);
-}
-.btn-primary:hover{ box-shadow: 0 0 0 1px var(--cyan), 0 0 26px rgba(63,232,214,0.45); }
-
-.btn-ghost{
-  background: transparent; color: var(--text-dim);
-  border: 1px solid var(--line-strong);
-}
-.btn-ghost:hover{ color: var(--text); border-color: var(--cyan); background: var(--cyan-soft); }
-
-.btn-danger{
-  background: transparent; color: var(--magenta);
-  border: 1px solid rgba(255,59,121,0.4);
-  margin-top: 14px;
-}
-.btn-danger:hover{ background: var(--magenta-soft); box-shadow: 0 0 16px rgba(255,59,121,0.25); }
-
+.btn-primary{ background: var(--blue); color: #071021; box-shadow: 0 0 0 1px rgba(78,143,255,0.5); }
+.btn-primary:hover{ background: #6DA2FF; box-shadow: 0 0 18px rgba(78,143,255,0.3); }
+.btn-ghost{ background: transparent; color: var(--text-dim); border: 1px solid var(--line-strong); }
+.btn-ghost:hover{ color: var(--text); border-color: var(--blue); background: var(--blue-soft); }
+.btn-danger{ background: transparent; color: var(--alert); border: 1px solid var(--alert-line); margin-top: 14px; }
+.btn-danger:hover{ background: var(--alert-soft); }
 .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
 
-/* ---- Toolbar ---- */
-.toolbar{ display:flex; gap:18px; align-items:center; margin-bottom:22px; flex-wrap:wrap; }
-#search-child{
-  flex:1; min-width: 220px; padding: 11px 14px;
-  border: 1px solid var(--line-strong); border-radius: var(--radius);
-  background: var(--panel); color: var(--text);
-}
+/* ---- Toolbar liste ---- */
+.toolbar{ display:flex; gap:14px; align-items:center; margin-bottom:18px; flex-wrap:wrap; }
+#search-child{ flex:1; min-width: 200px; padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); color: var(--text); }
 #search-child::placeholder{ color: var(--text-faint); }
-.filter-check{
-  display:flex; align-items:center; gap:8px; font-size:13px;
-  color: var(--text-dim); white-space:nowrap; font-family: var(--font-mono);
-  text-transform: uppercase; letter-spacing: 0.03em;
-}
-.filter-check input{ width:16px; height:16px; accent-color: var(--magenta); }
+.filter-check{ display:flex; align-items:center; gap:8px; font-size:13px; color: var(--text-dim); white-space:nowrap; }
+.filter-check input{ width:16px; height:16px; accent-color: var(--alert); }
 
-/* ---- Children grid ---- */
-.children-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(258px,1fr)); gap:16px; }
-
-.child-card{
-  --c: var(--cyan); --glow: var(--cyan-glow);
-  background: linear-gradient(160deg, var(--panel), var(--bg-deep));
-  border: 1px solid var(--line);
-  padding: 18px 17px 15px;
-  cursor:pointer;
-  transition: transform .12s ease, box-shadow .15s ease;
-}
-.child-card:hover{ transform: translateY(-2px); box-shadow: 0 0 22px rgba(63,232,214,0.12); }
-.child-card.has-alert{ --c: var(--magenta); --glow: var(--magenta-glow); }
-.child-card.has-alert:hover{ box-shadow: 0 0 22px rgba(255,59,121,0.18); }
-
-.child-card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-.child-name{ font-family: var(--font-display); font-weight:700; font-size:15.5px; letter-spacing:0.01em; margin:0; color: var(--text); }
-.child-group{ font-family: var(--font-mono); font-size:11px; color: var(--text-dim); margin: 4px 0 12px; text-transform: uppercase; letter-spacing: 0.04em; }
-
-.badge{
-  font-family: var(--font-mono); font-size: 10px; letter-spacing:0.04em;
-  padding: 4px 9px; border-radius: 3px; white-space:nowrap; text-transform: uppercase;
-  border: 1px solid transparent;
-}
-.badge-alert{ background: var(--magenta-soft); color: var(--magenta); border-color: rgba(255,59,121,0.4); animation: blink 2.4s ease-in-out infinite; }
-.badge-ok{ background: rgba(52,224,161,0.08); color: var(--ok); border-color: rgba(52,224,161,0.3); }
-
-.child-detail-line{
-  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim);
-  display:flex; gap:6px; margin-top:6px;
-}
-.child-detail-line b{ color: var(--text); font-weight:600; }
-
-.empty-state{
-  display:none; text-align:center; color: var(--text-dim); padding: 70px 20px;
-  border: 1px dashed var(--line-strong); font-family: var(--font-mono); font-size: 13px;
-}
-
-/* ---- Presences ---- */
 .date-picker{ display:flex; align-items:center; gap:8px; }
-.date-picker input[type="date"]{
-  padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius);
-  background: var(--panel); color: var(--text); font-family: var(--font-mono);
-}
-.date-picker .btn{ padding: 9px 14px; }
+.date-picker input[type="date"]{ padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel); color: var(--text); font-family: var(--font-mono); font-size: 13px; }
+.date-picker .btn{ padding: 9px 13px; }
 
 .presence-summary{
-  display:flex; gap:26px; margin-bottom:20px;
-  font-family: var(--font-mono); font-size:12px; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 0.04em;
+  display:flex; gap:26px; margin-bottom:16px;
+  font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em;
 }
-.presence-summary b{ color: var(--cyan); font-size:19px; display:block; font-family: var(--font-display); }
+.presence-summary b{ color: var(--sky); font-size:18px; display:block; font-family: var(--font-display); }
 
-.presence-list{ display:flex; flex-direction:column; gap:8px; }
-.presence-row{
-  display:flex; align-items:center; gap:14px;
-  background: var(--panel); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 11px 15px;
-  transition: border-color .15s ease;
+/* ---- Liste ---- */
+.list-wrap{
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
 }
-.presence-row:has(input:checked){ border-color: rgba(52,224,161,0.4); background: rgba(52,224,161,0.04); }
-.presence-row input[type="checkbox"]{ width:19px; height:19px; accent-color: var(--ok); }
-.presence-row .p-name{ font-weight:700; flex:1; }
-.presence-row .p-group{ font-family: var(--font-mono); font-size:11px; color: var(--text-faint); text-transform:uppercase; }
+.list-scroll{ overflow-x: auto; }
+.list-header, .list-row{
+  display:grid;
+  grid-template-columns: 44px 1.4fr 60px 110px 1.4fr;
+  column-gap: 16px;
+  align-items:center;
+  padding: 13px 18px;
+  min-width: 620px;
+}
+.list-header{
+  font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-faint); border-bottom: 1px solid var(--line);
+}
+.list-row{
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.list-row:last-child{ border-bottom: none; }
+.list-row:hover{ background: var(--blue-soft); }
+.list-row.has-alert{ background: linear-gradient(90deg, var(--alert-soft), transparent 40%); }
+.list-row.has-alert:hover{ background: linear-gradient(90deg, rgba(226,87,76,0.16), var(--blue-soft) 60%); }
+
+.lc-check{ display:flex; align-items:center; justify-content:center; }
+.lc-check input{ width:20px; height:20px; accent-color: var(--ok); cursor:pointer; }
+
+.lc-name{ min-width:0; }
+.lc-name .name{ font-weight:700; font-size: 15px; }
+.lc-name .sub{ font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em; margin-top:2px; }
+
+.lc-age{ font-family: var(--font-mono); color: var(--text-dim); font-size: 13.5px; }
+
+.lc-pai .badge{ font-family: var(--font-mono); font-size: 10px; letter-spacing:0.03em; padding: 4px 9px; border-radius: 4px; text-transform: uppercase; border: 1px solid transparent; white-space:nowrap; }
+.badge-alert{ background: var(--alert-soft); color: var(--alert); border-color: var(--alert-line); }
+.badge-ok{ background: var(--ok-soft); color: var(--ok); border-color: rgba(61,214,140,0.3); }
+
+.lc-traitement{ font-size: 13px; color: var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow: ellipsis; }
+.lc-traitement.empty{ color: var(--text-faint); }
+
+.empty-state{
+  display:none; text-align:center; color: var(--text-dim); padding: 60px 20px;
+  font-family: var(--font-mono); font-size: 13px;
+}
 
 /* ---- Settings ---- */
-.settings-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:18px; }
-.card-block{
-  background: linear-gradient(160deg, var(--panel), var(--bg-deep));
-  border: 1px solid var(--line); padding: 22px;
-}
-.card-block h3{ font-size:15px; margin-bottom:16px; letter-spacing:0.03em; color: var(--cyan); }
+.settings-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px; }
+.card-block{ background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+.card-block h3{ font-size:15px; margin-bottom:16px; color: var(--sky); }
 
-label{
-  display:block; font-family: var(--font-mono); font-size:10.5px; font-weight:600;
-  color: var(--text-dim); text-transform: uppercase; letter-spacing:0.06em; margin-bottom:14px;
-}
+label{ display:block; font-family: var(--font-mono); font-size:10.5px; font-weight:600; color: var(--text-dim); text-transform: uppercase; letter-spacing:0.05em; margin-bottom:14px; }
 input[type="text"], input[type="date"], input[type="tel"], input[type="search"], textarea, select{
   display:block; width:100%; margin-top:6px; padding: 10px 12px;
-  border: 1px solid var(--line-strong); border-radius: 4px;
-  background: var(--bg-deep); color: var(--text); font-weight:500; font-family: var(--font-body); font-size: 15px;
+  border: 1px solid var(--line-strong); border-radius: 6px;
+  background: var(--bg-deep); color: var(--text); font-weight:400; font-family: var(--font-body); font-size: 15px;
 }
 textarea{ resize: vertical; }
-input:focus, textarea:focus, select:focus{ outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(63,232,214,0.15); }
-
+input:focus, textarea:focus, select:focus{ outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(78,143,255,0.15); }
 .row-2{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
 
 /* ---- Modal ---- */
-.modal-overlay{
-  display:none; position:fixed; inset:0; background: rgba(2,3,4,0.75);
-  backdrop-filter: blur(3px);
-  align-items:center; justify-content:center; padding:24px; z-index:50;
-}
+.modal-overlay{ display:none; position:fixed; inset:0; background: rgba(4,7,13,0.72); backdrop-filter: blur(3px); align-items:center; justify-content:center; padding:24px; z-index:50; }
 .modal-overlay.is-open{ display:flex; }
-.modal{
-  background: var(--bg-deep); border: 1px solid var(--line-strong);
-  max-width: 640px; width:100%; max-height:88vh; overflow-y:auto;
-  box-shadow: 0 0 60px rgba(63,232,214,0.15), 0 20px 60px rgba(0,0,0,0.5);
-}
-.modal-head{
-  display:flex; justify-content:space-between; align-items:center;
-  padding: 18px 24px; border-bottom: 1px solid var(--line);
-  position:sticky; top:0; background: var(--bg-deep); z-index:2;
-}
-.modal-head h3{ font-size:15px; letter-spacing:0.03em; color: var(--cyan); }
-.modal-close{ background:transparent; border:1px solid var(--line-strong); color: var(--text-dim); width:30px; height:30px; cursor:pointer; border-radius:4px; }
-.modal-close:hover{ color: var(--magenta); border-color: var(--magenta); }
+.modal{ background: var(--bg-deep); border: 1px solid var(--line-strong); max-width: 620px; width:100%; max-height:88vh; overflow-y:auto; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.modal-head{ display:flex; justify-content:space-between; align-items:center; padding: 18px 24px; border-bottom: 1px solid var(--line); position:sticky; top:0; background: var(--bg-deep); z-index:2; }
+.modal-head h3{ font-size:16px; color: var(--sky); }
+.modal-close{ background:transparent; border:1px solid var(--line-strong); color: var(--text-dim); width:30px; height:30px; cursor:pointer; border-radius:6px; }
+.modal-close:hover{ color: var(--alert); border-color: var(--alert); }
 .modal-body{ padding: 20px 24px 24px; }
 
-fieldset{ border:none; padding:0; margin:0 0 24px; }
-legend{
-  font-family: var(--font-mono); font-size:10.5px; text-transform:uppercase;
-  letter-spacing:0.1em; color: var(--cyan); margin-bottom:12px; padding:0;
-}
-.fieldset-alert{
-  background: var(--magenta-soft); border: 1px solid rgba(255,59,121,0.3);
-  padding: 16px 16px 4px;
-}
-.fieldset-alert legend{ color: var(--magenta); }
+.hidden{ display:none !important; }
 
-.checkbox-line{ display:flex; align-items:center; gap:9px; font-weight:700; color: var(--text); text-transform:none; font-family: var(--font-body); font-size:14.5px; }
-.checkbox-line input{ width:18px; height:18px; accent-color: var(--magenta); }
+/* Vue détail (lecture) */
+.detail-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom: 18px; flex-wrap: wrap; }
+.detail-name{ font-size: 22px; font-weight: 700; }
+.detail-sub{ font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
 
-.modal-actions{
+.detail-block{ margin-bottom: 20px; }
+.detail-label{ font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); margin-bottom: 10px; }
+
+.contact-card{
   display:flex; justify-content:space-between; align-items:center;
-  border-top: 1px solid var(--line); padding-top:16px; margin-top:6px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 15px; margin-bottom: 8px;
 }
+.contact-card .c-name{ font-weight: 600; font-size: 14px; }
+.contact-card a.c-tel{
+  font-family: var(--font-mono); font-size: 15px; font-weight:600; color: var(--sky);
+  text-decoration: none; border: 1px solid var(--line-strong); padding: 6px 12px; border-radius: 6px;
+}
+.contact-card a.c-tel:hover{ background: var(--blue-soft); border-color: var(--blue); }
+.contact-empty{ color: var(--text-faint); font-size: 13px; font-style: italic; }
+
+.detail-alert{ background: var(--alert-soft); border: 1px solid var(--alert-line); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+.detail-alert .detail-label{ color: var(--alert); }
+.detail-alert p{ margin: 0; font-size: 14px; line-height: 1.5; }
+
+.detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 6px; }
+.detail-item .k{ font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; color: var(--text-faint); letter-spacing: 0.05em; margin-bottom: 4px; }
+.detail-item .v{ font-size: 14px; color: var(--text); }
+
+.detail-notes{ font-size: 14px; color: var(--text-dim); line-height:1.6; }
+
+.modal-actions{ display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--line); padding-top:16px; margin-top: 20px; }
 .modal-actions-right{ display:flex; gap:10px; }
+
+fieldset{ border:none; padding:0; margin:0 0 22px; }
+legend{ font-family: var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color: var(--blue); margin-bottom:12px; padding:0; }
+.fieldset-alert{ background: var(--alert-soft); border: 1px solid var(--alert-line); border-radius: 8px; padding: 16px 16px 4px; }
+.fieldset-alert legend{ color: var(--alert); }
+.checkbox-line{ display:flex; align-items:center; gap:9px; font-weight:600; color: var(--text); text-transform:none; font-family: var(--font-body); font-size:14.5px; }
+.checkbox-line input{ width:18px; height:18px; accent-color: var(--alert); }
 
 /* ---- Print ---- */
 #print-area{ display:none; }
@@ -446,14 +359,14 @@ legend{
   .side-nav{ flex-direction:row; flex-wrap:wrap; }
   .nav-btn{ flex:1; min-width: 140px; }
   .side-foot{ display:none; }
-  .main{ padding: 24px 18px 60px; }
-  .row-2{ grid-template-columns: 1fr; }
+  .main{ padding: 22px 16px 60px; }
+  .row-2, .detail-grid{ grid-template-columns: 1fr; }
   .topbar{ padding: 12px 16px; }
   .clock-block{ display:none; }
 }
 
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
-  outline: 2px solid var(--cyan); outline-offset: 2px;
+  outline: 2px solid var(--blue); outline-offset: 2px;
 }
 </style>
 </head>
@@ -463,18 +376,17 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 
 <div class="app">
 
-  <!-- TOP BAR -->
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark">CDC</div>
       <div class="brand-text">
-        <h1>CARNET DE COLO</h1>
-        <p>Système de suivi terrain — enfants &amp; présences</p>
+        <h1>Carnet de colo</h1>
+        <p>Suivi terrain — enfants &amp; présences</p>
       </div>
     </div>
     <div class="topbar-right">
-      <span id="mission-day" class="mission-day">SÉJOUR NON CONFIGURÉ</span>
-      <span class="status-pill"><span class="status-dot"></span>Données locales — en ligne</span>
+      <span id="mission-day" class="mission-day">Séjour non configuré</span>
+      <span class="status-pill"><span class="status-dot"></span>Données locales</span>
       <div class="clock-block">
         <div id="clock-time" class="clock-time">00:00:00</div>
         <div id="clock-date" class="clock-date">—</div>
@@ -484,22 +396,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 
   <div class="body-shell">
 
-    <!-- SIDEBAR -->
     <aside class="side">
       <p class="side-label">Modules</p>
       <nav class="side-nav">
-        <button class="nav-btn is-active" data-view="enfants">
-          <span class="nav-id">01 // BASE</span>
-          <span class="nav-label">Enfants</span>
-          <span class="nav-meta" id="nav-meta-enfants">0 fiche(s)</span>
-        </button>
-        <button class="nav-btn" data-view="presences">
-          <span class="nav-id">02 // POINTAGE</span>
-          <span class="nav-label">Présences</span>
-          <span class="nav-meta" id="nav-meta-presences">—</span>
+        <button class="nav-btn is-active" data-view="liste">
+          <span class="nav-id">01</span>
+          <span class="nav-label">Liste &amp; présences</span>
+          <span class="nav-meta" id="nav-meta-liste">0 enfant(s)</span>
         </button>
         <button class="nav-btn" data-view="reglages">
-          <span class="nav-id">03 // SYSTÈME</span>
+          <span class="nav-id">02</span>
           <span class="nav-label">Séjour &amp; export</span>
           <span class="nav-meta">Sauvegarde locale</span>
         </button>
@@ -510,14 +416,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
       </div>
     </aside>
 
-    <!-- MAIN -->
     <main class="main">
 
-      <!-- VUE ENFANTS -->
-      <section id="view-enfants" class="view is-active">
+      <!-- VUE LISTE + PRESENCES -->
+      <section id="view-liste" class="view is-active">
         <header class="view-head">
           <div>
-            <p class="eyebrow">Base de données — fiches individuelles</p>
+            <p class="eyebrow">Fiches &amp; pointage</p>
             <h2>Les enfants du séjour</h2>
           </div>
           <button class="btn btn-primary" id="btn-add-child">+ Nouvelle fiche</button>
@@ -527,43 +432,43 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
           <input type="search" id="search-child" placeholder="Rechercher un nom, un groupe...">
           <label class="filter-check">
             <input type="checkbox" id="filter-allergies">
-            Allergies / PAI uniquement
+            PAI / allergies uniquement
           </label>
-        </div>
-
-        <div id="children-grid" class="children-grid"></div>
-        <p id="empty-state" class="empty-state hud">Aucun enfant enregistré. Ajoute la première fiche avec le bouton ci-dessus.</p>
-      </section>
-
-      <!-- VUE PRESENCES -->
-      <section id="view-presences" class="view">
-        <header class="view-head">
-          <div>
-            <p class="eyebrow">Pointage — feuille du jour</p>
-            <h2>Présences</h2>
-          </div>
           <div class="date-picker">
             <button id="date-prev" class="btn btn-ghost" aria-label="Jour précédent">←</button>
             <input type="date" id="presence-date">
             <button id="date-next" class="btn btn-ghost" aria-label="Jour suivant">→</button>
           </div>
-        </header>
-        <p class="hint">Coche les enfants présents. Un enfant non coché est marqué absent pour cette date.</p>
+        </div>
+
         <div id="presence-summary" class="presence-summary"></div>
-        <div id="presence-list" class="presence-list"></div>
+
+        <div class="list-wrap frame">
+          <div class="list-scroll">
+            <div class="list-header">
+              <span></span>
+              <span>Enfant</span>
+              <span>Âge</span>
+              <span>PAI</span>
+              <span>Traitement</span>
+            </div>
+            <div id="children-list"></div>
+          </div>
+        </div>
+        <p id="empty-state" class="empty-state">Aucun enfant enregistré. Ajoute la première fiche avec le bouton ci-dessus.</p>
       </section>
 
       <!-- VUE REGLAGES -->
       <section id="view-reglages" class="view">
         <header class="view-head">
           <div>
-            <p class="eyebrow">Paramètres système</p>
+            <p class="eyebrow">Paramètres</p>
             <h2>Séjour &amp; export</h2>
           </div>
         </header>
 
         <div class="settings-grid">
-          <div class="card-block hud">
+          <div class="card-block frame">
             <h3>Informations du séjour</h3>
             <label>Nom du séjour
               <input type="text" id="camp-name" placeholder="Colo été 2026 — Les Sapins">
@@ -579,7 +484,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
             <button class="btn btn-primary" id="btn-save-camp">Enregistrer</button>
           </div>
 
-          <div class="card-block hud">
+          <div class="card-block frame">
             <h3>Sauvegarde des données</h3>
             <p class="hint">Les données ne vivent que dans ce navigateur. Exporte un fichier de sauvegarde régulièrement.</p>
             <div class="btn-row">
@@ -590,7 +495,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
             <button class="btn btn-danger" id="btn-reset">Effacer toutes les données</button>
           </div>
 
-          <div class="card-block hud">
+          <div class="card-block frame">
             <h3>Impression</h3>
             <p class="hint">Génère les fiches sanitaires de tous les enfants, prêtes à imprimer pour l'équipe.</p>
             <button class="btn btn-primary" id="btn-print-all">Imprimer toutes les fiches</button>
@@ -604,85 +509,101 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 
 <!-- MODALE FICHE ENFANT -->
 <div id="modal-child" class="modal-overlay">
-  <div class="modal">
+  <div class="modal frame">
     <div class="modal-head">
       <h3 id="modal-title">Fiche enfant</h3>
       <button class="modal-close" id="modal-close" aria-label="Fermer">✕</button>
     </div>
-    <form id="child-form" class="modal-body">
-      <input type="hidden" id="child-id">
+    <div class="modal-body">
 
-      <fieldset>
-        <legend>Identité</legend>
-        <div class="row-2">
-          <label>Prénom *
-            <input type="text" id="f-prenom" required>
+      <!-- VUE DETAIL (lecture) -->
+      <div id="detail-view"></div>
+
+      <!-- FORMULAIRE (édition) -->
+      <form id="child-form" class="hidden">
+        <input type="hidden" id="child-id">
+
+        <fieldset>
+          <legend>Identité</legend>
+          <div class="row-2">
+            <label>Prénom *
+              <input type="text" id="f-prenom" required>
+            </label>
+            <label>Nom *
+              <input type="text" id="f-nom" required>
+            </label>
+          </div>
+          <div class="row-2">
+            <label>Date de naissance
+              <input type="date" id="f-naissance">
+            </label>
+            <label>Groupe / tranche d'âge
+              <input type="text" id="f-groupe" placeholder="ex. Les Marmottes">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contacts parents / responsables</legend>
+          <div class="row-2">
+            <label>Nom — contact 1
+              <input type="text" id="f-contact1-nom" placeholder="ex. Mère — Julie Martin">
+            </label>
+            <label>Téléphone — contact 1
+              <input type="tel" id="f-contact1-tel" placeholder="06 12 34 56 78">
+            </label>
+          </div>
+          <div class="row-2">
+            <label>Nom — contact 2
+              <input type="text" id="f-contact2-nom" placeholder="ex. Père — Marc Martin">
+            </label>
+            <label>Téléphone — contact 2
+              <input type="tel" id="f-contact2-tel" placeholder="06 98 76 54 32">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset-alert">
+          <legend>Santé — allergies &amp; PAI</legend>
+          <label class="checkbox-line">
+            <input type="checkbox" id="f-has-allergie">
+            Allergie(s) connue(s) ou Projet d'Accueil Individualisé (PAI)
           </label>
-          <label>Nom *
-            <input type="text" id="f-nom" required>
+          <label>Détails (allergies, traitement, PAI, conduite à tenir)
+            <textarea id="f-allergie-detail" rows="3" placeholder="ex. Allergie arachide — trousse d'urgence dans le sac à dos, PAI signé par les parents"></textarea>
           </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Autres informations santé</legend>
+          <label>Traitement médical en cours
+            <textarea id="f-traitement" rows="2"></textarea>
+          </label>
+          <label>Régime alimentaire particulier
+            <input type="text" id="f-regime">
+          </label>
+          <label>Vaccinations à jour ?
+            <select id="f-vaccins">
+              <option value="oui">Oui</option>
+              <option value="non">Non</option>
+              <option value="ne-sait-pas">Je ne sais pas</option>
+            </select>
+          </label>
+          <label>Remarques complémentaires
+            <textarea id="f-notes" rows="2"></textarea>
+          </label>
+        </fieldset>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="btn-delete-child">Supprimer cette fiche</button>
+          <div class="modal-actions-right">
+            <button type="button" class="btn btn-ghost" id="btn-cancel">Annuler</button>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </div>
         </div>
-        <div class="row-2">
-          <label>Date de naissance
-            <input type="date" id="f-naissance">
-          </label>
-          <label>Groupe / tranche d'âge
-            <input type="text" id="f-groupe" placeholder="ex. Les Marmottes">
-          </label>
-        </div>
-      </fieldset>
+      </form>
 
-      <fieldset>
-        <legend>Contact d'urgence</legend>
-        <div class="row-2">
-          <label>Nom du contact
-            <input type="text" id="f-contact-nom">
-          </label>
-          <label>Téléphone
-            <input type="tel" id="f-contact-tel">
-          </label>
-        </div>
-      </fieldset>
-
-      <fieldset class="fieldset-alert">
-        <legend>Santé — allergies &amp; PAI</legend>
-        <label class="checkbox-line">
-          <input type="checkbox" id="f-has-allergie">
-          Allergie(s) connue(s) ou Projet d'Accueil Individualisé (PAI)
-        </label>
-        <label>Détails (allergies, traitement, PAI, conduite à tenir)
-          <textarea id="f-allergie-detail" rows="3" placeholder="ex. Allergie arachide — trousse d'urgence dans le sac à dos, PAI signé par les parents"></textarea>
-        </label>
-      </fieldset>
-
-      <fieldset>
-        <legend>Autres informations santé</legend>
-        <label>Traitement médical en cours
-          <textarea id="f-traitement" rows="2"></textarea>
-        </label>
-        <label>Régime alimentaire particulier
-          <input type="text" id="f-regime">
-        </label>
-        <label>Vaccinations à jour ?
-          <select id="f-vaccins">
-            <option value="oui">Oui</option>
-            <option value="non">Non</option>
-            <option value="ne-sait-pas">Je ne sais pas</option>
-          </select>
-        </label>
-        <label>Remarques complémentaires
-          <textarea id="f-notes" rows="2"></textarea>
-        </label>
-      </fieldset>
-
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" id="btn-delete-child">Supprimer cette fiche</button>
-        <div class="modal-actions-right">
-          <button type="button" class="btn btn-ghost" id="btn-cancel">Annuler</button>
-          <button type="submit" class="btn btn-primary">Enregistrer</button>
-        </div>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
 
@@ -692,14 +613,39 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 /* ============================================================
    Carnet de colo — logique applicative (localStorage uniquement)
    ============================================================ */
-const STORAGE_KEY = "colo-suivi:data:v1";
+const STORAGE_KEY = "colo-suivi:data:v2";
+const OLD_STORAGE_KEY = "colo-suivi:data:v1";
+
+function migrateChild(c){
+  // Compat avec l'ancien format (un seul contact d'urgence)
+  if(c.contactNom !== undefined && c.contact1Nom === undefined){
+    c.contact1Nom = c.contactNom || "";
+    c.contact1Tel = c.contactTel || "";
+    c.contact2Nom = "";
+    c.contact2Tel = "";
+  }
+  c.contact1Nom = c.contact1Nom || "";
+  c.contact1Tel = c.contact1Tel || "";
+  c.contact2Nom = c.contact2Nom || "";
+  c.contact2Tel = c.contact2Tel || "";
+  return c;
+}
 
 function loadData(){
-  const raw = localStorage.getItem(STORAGE_KEY);
+  let raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw){
+    // tentative de récupération depuis l'ancienne clé
+    const old = localStorage.getItem(OLD_STORAGE_KEY);
+    if(old) raw = old;
+  }
   if(!raw) return { children: [], presences: {}, camp: { name:"", start:"", end:"" } };
   try{
     const p = JSON.parse(raw);
-    return { children: p.children||[], presences: p.presences||{}, camp: p.camp||{name:"",start:"",end:""} };
+    return {
+      children: (p.children||[]).map(migrateChild),
+      presences: p.presences||{},
+      camp: p.camp||{name:"",start:"",end:""}
+    };
   }catch(e){
     console.error("Données locales illisibles, réinitialisation.", e);
     return { children: [], presences: {}, camp: { name:"", start:"", end:"" } };
@@ -718,7 +664,6 @@ navButtons.forEach(btn=>{
     views.forEach(v=>v.classList.remove("is-active"));
     btn.classList.add("is-active");
     document.getElementById("view-"+btn.dataset.view).classList.add("is-active");
-    if(btn.dataset.view==="presences") renderPresences();
   });
 });
 
@@ -736,10 +681,10 @@ function ageFromBirth(iso){
 }
 function escapeHtml(str){
   if(!str) return "";
-  return str.replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
+  return String(str).replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
 }
 
-/* ---------------- Horloge de mission ---------------- */
+/* ---------------- Horloge ---------------- */
 function tickClock(){
   const now = new Date();
   document.getElementById("clock-time").textContent = now.toLocaleTimeString("fr-FR");
@@ -751,32 +696,49 @@ setInterval(tickClock, 1000);
 function renderMissionDay(){
   const el = document.getElementById("mission-day");
   const { start, end } = state.camp;
-  if(!start){ el.textContent = "SÉJOUR NON CONFIGURÉ"; return; }
+  if(!start){ el.textContent = "Séjour non configuré"; return; }
   const today = new Date(todayISO());
   const s = new Date(start);
   const dayNum = Math.floor((today - s) / 86400000) + 1;
   if(end){
     const e = new Date(end);
     const totalDays = Math.floor((e - s) / 86400000) + 1;
-    if(dayNum < 1) el.textContent = `DÉPART DANS ${1 - dayNum} J`;
-    else if(dayNum > totalDays) el.textContent = `SÉJOUR TERMINÉ — J+${dayNum - totalDays}`;
-    else el.textContent = `JOUR DE SÉJOUR ${dayNum} / ${totalDays}`;
+    if(dayNum < 1) el.textContent = `Départ dans ${1 - dayNum} j`;
+    else if(dayNum > totalDays) el.textContent = `Séjour terminé (J+${dayNum - totalDays})`;
+    else el.textContent = `Jour de séjour ${dayNum} / ${totalDays}`;
   } else {
-    el.textContent = dayNum >= 1 ? `JOUR DE SÉJOUR ${dayNum}` : `DÉPART DANS ${1 - dayNum} J`;
+    el.textContent = dayNum >= 1 ? `Jour de séjour ${dayNum}` : `Départ dans ${1 - dayNum} j`;
   }
 }
 
 /* ============================================================
-   VUE ENFANTS
+   LISTE + PRESENCES (vue unifiée)
    ============================================================ */
-const grid = document.getElementById("children-grid");
+const listEl = document.getElementById("children-list");
 const emptyState = document.getElementById("empty-state");
 const searchInput = document.getElementById("search-child");
 const filterAllergies = document.getElementById("filter-allergies");
+const dateInput = document.getElementById("presence-date");
+const presenceSummary = document.getElementById("presence-summary");
 
-function renderChildren(){
+dateInput.value = todayISO();
+dateInput.addEventListener("change", renderList);
+document.getElementById("date-prev").addEventListener("click", ()=>shiftDate(-1));
+document.getElementById("date-next").addEventListener("click", ()=>shiftDate(1));
+searchInput.addEventListener("input", renderList);
+filterAllergies.addEventListener("change", renderList);
+
+function shiftDate(delta){
+  const d = new Date(dateInput.value || todayISO());
+  d.setDate(d.getDate()+delta);
+  dateInput.value = d.toISOString().slice(0,10);
+  renderList();
+}
+
+function renderList(){
   const query = searchInput.value.trim().toLowerCase();
   const onlyAlert = filterAllergies.checked;
+  const date = dateInput.value || todayISO();
 
   const list = state.children
     .filter(c=>{
@@ -786,7 +748,7 @@ function renderChildren(){
     })
     .sort((a,b)=>a.prenom.localeCompare(b.prenom,"fr"));
 
-  grid.innerHTML = "";
+  listEl.innerHTML = "";
 
   if(state.children.length===0){
     emptyState.style.display="block";
@@ -798,56 +760,145 @@ function renderChildren(){
     emptyState.style.display="none";
   }
 
+  let presentCount = 0;
+  const totalAll = state.children.length;
+
   list.forEach(c=>{
-    const card=document.createElement("div");
-    card.className="child-card hud"+(c.hasAllergie?" has-alert":"");
-    const age=ageFromBirth(c.naissance);
-    card.innerHTML=`
-      <div class="child-card-top">
-        <div>
-          <p class="child-name">${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</p>
-          <p class="child-group">${escapeHtml(c.groupe||"Groupe non renseigné")}${age!==null?" · "+age+" ans":""}</p>
-        </div>
-        <span class="badge ${c.hasAllergie?"badge-alert":"badge-ok"}">
-          ${c.hasAllergie?"⚠ Allergie / PAI":"RAS"}
-        </span>
-      </div>
-      ${c.contactNom?`<div class="child-detail-line"><b>Urgence :</b> ${escapeHtml(c.contactNom)} ${c.contactTel?"· "+escapeHtml(c.contactTel):""}</div>`:""}
-      ${c.regime?`<div class="child-detail-line"><b>Régime :</b> ${escapeHtml(c.regime)}</div>`:""}
+    const age = ageFromBirth(c.naissance);
+    const isPresent = !!(state.presences[c.id] && state.presences[c.id][date]);
+    if(isPresent) presentCount++;
+
+    const row = document.createElement("div");
+    row.className = "list-row" + (c.hasAllergie ? " has-alert" : "");
+    row.innerHTML = `
+      <span class="lc-check"><input type="checkbox" ${isPresent?"checked":""} aria-label="Présent(e)"></span>
+      <span class="lc-name">
+        <div class="name">${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</div>
+        <div class="sub">${escapeHtml(c.groupe||"Groupe non renseigné")}</div>
+      </span>
+      <span class="lc-age">${age!==null?age+" ans":"—"}</span>
+      <span class="lc-pai"><span class="badge ${c.hasAllergie?"badge-alert":"badge-ok"}">${c.hasAllergie?"PAI":"RAS"}</span></span>
+      <span class="lc-traitement ${c.traitement?"":"empty"}" title="${escapeHtml(c.traitement||"")}">${escapeHtml(c.traitement || "Aucun traitement")}</span>
     `;
-    card.addEventListener("click", ()=>openChildModal(c.id));
-    grid.appendChild(card);
+    const checkbox = row.querySelector(".lc-check input");
+    checkbox.addEventListener("click", e=>{
+      e.stopPropagation();
+      if(!state.presences[c.id]) state.presences[c.id]={};
+      state.presences[c.id][date] = checkbox.checked;
+      saveData();
+      renderList();
+    });
+    row.addEventListener("click", ()=> openDetailView(c.id));
+    listEl.appendChild(row);
   });
 
-  document.getElementById("nav-meta-enfants").textContent = `${state.children.length} fiche(s)`;
+  presenceSummary.innerHTML = totalAll === 0 ? "" : `
+    <span><b>${presentCount}</b>présent(s)</span>
+    <span><b>${list.length - presentCount}</b>absent(s) (filtre actuel)</span>
+    <span><b>${totalAll}</b>au total</span>
+  `;
+  document.getElementById("nav-meta-liste").textContent = `${totalAll} enfant(s) · ${presentCount} présent(s)`;
 }
 
-searchInput.addEventListener("input", renderChildren);
-filterAllergies.addEventListener("change", renderChildren);
-
-/* ---------------- Modale fiche enfant ---------------- */
+/* ============================================================
+   MODALE — VUE DETAIL + FORMULAIRE EDITION
+   ============================================================ */
 const modal = document.getElementById("modal-child");
-const form = document.getElementById("child-form");
 const modalTitle = document.getElementById("modal-title");
+const detailView = document.getElementById("detail-view");
+const form = document.getElementById("child-form");
 const btnDelete = document.getElementById("btn-delete-child");
 
-document.getElementById("btn-add-child").addEventListener("click", ()=>openChildModal(null));
+document.getElementById("btn-add-child").addEventListener("click", ()=>openEditForm(null));
 document.getElementById("modal-close").addEventListener("click", closeModal);
 document.getElementById("btn-cancel").addEventListener("click", closeModal);
 modal.addEventListener("click", e=>{ if(e.target===modal) closeModal(); });
 
-function openChildModal(id){
+function contactCardHtml(nom, tel){
+  if(!nom && !tel){
+    return `<div class="contact-card"><span class="contact-empty">Non renseigné</span></div>`;
+  }
+  const telClean = (tel||"").replace(/[^\d+]/g,"");
+  return `
+    <div class="contact-card">
+      <span class="c-name">${escapeHtml(nom || "Contact")}</span>
+      ${tel ? `<a class="c-tel" href="tel:${telClean}">${escapeHtml(tel)}</a>` : `<span class="contact-empty">Pas de numéro</span>`}
+    </div>
+  `;
+}
+
+function openDetailView(id){
+  const c = state.children.find(x=>x.id===id);
+  if(!c) return;
+  const age = ageFromBirth(c.naissance);
+
+  modalTitle.textContent = "Fiche enfant";
+  form.classList.add("hidden");
+  detailView.classList.remove("hidden");
+
+  detailView.innerHTML = `
+    <div class="detail-top">
+      <div>
+        <div class="detail-name">${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</div>
+        <div class="detail-sub">${escapeHtml(c.groupe||"Groupe non renseigné")}${age!==null?" · "+age+" ans":""}${c.naissance?" · né(e) le "+formatDateFR(c.naissance):""}</div>
+      </div>
+      <span class="badge ${c.hasAllergie?"badge-alert":"badge-ok"}">${c.hasAllergie?"⚠ PAI / allergie":"RAS"}</span>
+    </div>
+
+    <div class="detail-block">
+      <div class="detail-label">Contacts parents / responsables</div>
+      ${contactCardHtml(c.contact1Nom, c.contact1Tel)}
+      ${contactCardHtml(c.contact2Nom, c.contact2Tel)}
+    </div>
+
+    ${c.hasAllergie ? `
+      <div class="detail-alert">
+        <div class="detail-label">⚠ Allergie / PAI</div>
+        <p>${escapeHtml(c.allergieDetail || "Détails non renseignés — vérifier avec la famille.")}</p>
+      </div>
+    ` : ""}
+
+    <div class="detail-grid">
+      <div class="detail-item"><div class="k">Traitement en cours</div><div class="v">${escapeHtml(c.traitement || "Aucun")}</div></div>
+      <div class="detail-item"><div class="k">Régime alimentaire</div><div class="v">${escapeHtml(c.regime || "Aucun signalé")}</div></div>
+      <div class="detail-item"><div class="k">Vaccinations à jour</div><div class="v">${c.vaccins==="oui"?"Oui":c.vaccins==="non"?"Non":"Non renseigné"}</div></div>
+    </div>
+
+    ${c.notes ? `<div class="detail-block"><div class="detail-label">Remarques</div><p class="detail-notes">${escapeHtml(c.notes)}</p></div>` : ""}
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="btn-delete-from-detail">Supprimer cette fiche</button>
+      <div class="modal-actions-right">
+        <button type="button" class="btn btn-ghost" id="btn-close-detail">Fermer</button>
+        <button type="button" class="btn btn-primary" id="btn-edit-from-detail">Modifier</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btn-close-detail").addEventListener("click", closeModal);
+  document.getElementById("btn-edit-from-detail").addEventListener("click", ()=>openEditForm(id));
+  document.getElementById("btn-delete-from-detail").addEventListener("click", ()=>deleteChild(id));
+
+  modal.classList.add("is-open");
+}
+
+function openEditForm(id){
   form.reset();
+  detailView.classList.add("hidden");
+  form.classList.remove("hidden");
+
   if(id){
     const c = state.children.find(x=>x.id===id);
-    modalTitle.textContent = `Fiche de ${c.prenom} ${c.nom}`;
+    modalTitle.textContent = `Modifier — ${c.prenom} ${c.nom}`;
     document.getElementById("child-id").value = c.id;
     document.getElementById("f-prenom").value = c.prenom||"";
     document.getElementById("f-nom").value = c.nom||"";
     document.getElementById("f-naissance").value = c.naissance||"";
     document.getElementById("f-groupe").value = c.groupe||"";
-    document.getElementById("f-contact-nom").value = c.contactNom||"";
-    document.getElementById("f-contact-tel").value = c.contactTel||"";
+    document.getElementById("f-contact1-nom").value = c.contact1Nom||"";
+    document.getElementById("f-contact1-tel").value = c.contact1Tel||"";
+    document.getElementById("f-contact2-nom").value = c.contact2Nom||"";
+    document.getElementById("f-contact2-tel").value = c.contact2Tel||"";
     document.getElementById("f-has-allergie").checked = !!c.hasAllergie;
     document.getElementById("f-allergie-detail").value = c.allergieDetail||"";
     document.getElementById("f-traitement").value = c.traitement||"";
@@ -862,7 +913,17 @@ function openChildModal(id){
   }
   modal.classList.add("is-open");
 }
+
 function closeModal(){ modal.classList.remove("is-open"); }
+
+function deleteChild(id){
+  if(!confirm("Supprimer définitivement cette fiche ? Cette action est irréversible.")) return;
+  state.children = state.children.filter(c=>c.id!==id);
+  delete state.presences[id];
+  saveData();
+  renderList();
+  closeModal();
+}
 
 form.addEventListener("submit", e=>{
   e.preventDefault();
@@ -873,8 +934,10 @@ form.addEventListener("submit", e=>{
     nom: document.getElementById("f-nom").value.trim(),
     naissance: document.getElementById("f-naissance").value,
     groupe: document.getElementById("f-groupe").value.trim(),
-    contactNom: document.getElementById("f-contact-nom").value.trim(),
-    contactTel: document.getElementById("f-contact-tel").value.trim(),
+    contact1Nom: document.getElementById("f-contact1-nom").value.trim(),
+    contact1Tel: document.getElementById("f-contact1-tel").value.trim(),
+    contact2Nom: document.getElementById("f-contact2-nom").value.trim(),
+    contact2Tel: document.getElementById("f-contact2-tel").value.trim(),
     hasAllergie: document.getElementById("f-has-allergie").checked,
     allergieDetail: document.getElementById("f-allergie-detail").value.trim(),
     traitement: document.getElementById("f-traitement").value.trim(),
@@ -885,81 +948,14 @@ form.addEventListener("submit", e=>{
   const idx = state.children.findIndex(c=>c.id===id);
   if(idx>=0) state.children[idx]=child; else state.children.push(child);
   saveData();
-  renderChildren();
+  renderList();
   closeModal();
 });
 
 btnDelete.addEventListener("click", ()=>{
   const id = document.getElementById("child-id").value;
-  if(!id) return;
-  if(!confirm("Supprimer définitivement cette fiche ? Cette action est irréversible.")) return;
-  state.children = state.children.filter(c=>c.id!==id);
-  delete state.presences[id];
-  saveData();
-  renderChildren();
-  closeModal();
+  if(id) deleteChild(id);
 });
-
-/* ============================================================
-   VUE PRESENCES
-   ============================================================ */
-const dateInput = document.getElementById("presence-date");
-const presenceList = document.getElementById("presence-list");
-const presenceSummary = document.getElementById("presence-summary");
-
-dateInput.value = todayISO();
-dateInput.addEventListener("change", renderPresences);
-document.getElementById("date-prev").addEventListener("click", ()=>shiftDate(-1));
-document.getElementById("date-next").addEventListener("click", ()=>shiftDate(1));
-
-function shiftDate(delta){
-  const d = new Date(dateInput.value || todayISO());
-  d.setDate(d.getDate()+delta);
-  dateInput.value = d.toISOString().slice(0,10);
-  renderPresences();
-}
-
-function renderPresences(){
-  const date = dateInput.value || todayISO();
-  presenceList.innerHTML = "";
-
-  if(state.children.length===0){
-    presenceList.innerHTML = `<p class="hint">Ajoute d'abord des enfants dans le module 01.</p>`;
-    presenceSummary.innerHTML = "";
-    document.getElementById("nav-meta-presences").textContent = "—";
-    return;
-  }
-
-  const sorted = [...state.children].sort((a,b)=>a.prenom.localeCompare(b.prenom,"fr"));
-  let presentCount = 0;
-
-  sorted.forEach(c=>{
-    const isPresent = state.presences[c.id] && state.presences[c.id][date];
-    if(isPresent) presentCount++;
-    const row = document.createElement("label");
-    row.className = "presence-row";
-    row.innerHTML = `
-      <input type="checkbox" ${isPresent?"checked":""} data-child="${c.id}">
-      <span class="p-name">${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</span>
-      <span class="p-group">${escapeHtml(c.groupe||"")}</span>
-      ${c.hasAllergie?'<span class="badge badge-alert">⚠</span>':""}
-    `;
-    row.querySelector("input").addEventListener("change", e=>{
-      if(!state.presences[c.id]) state.presences[c.id]={};
-      state.presences[c.id][date] = e.target.checked;
-      saveData();
-      renderPresences();
-    });
-    presenceList.appendChild(row);
-  });
-
-  presenceSummary.innerHTML = `
-    <span><b>${presentCount}</b>présent(s)</span>
-    <span><b>${sorted.length-presentCount}</b>absent(s)</span>
-    <span><b>${sorted.length}</b>au total</span>
-  `;
-  document.getElementById("nav-meta-presences").textContent = `${presentCount}/${sorted.length} présent(s)`;
-}
 
 /* ============================================================
    VUE REGLAGES / EXPORT
@@ -999,13 +995,12 @@ document.getElementById("import-file").addEventListener("change", e=>{
       if(!imported.children) throw new Error("Format invalide");
       if(!confirm("Importer ce fichier remplacera toutes les données actuelles. Continuer ?")) return;
       state = {
-        children: imported.children||[],
+        children: (imported.children||[]).map(migrateChild),
         presences: imported.presences||{},
         camp: imported.camp||{name:"",start:"",end:""}
       };
       saveData();
-      renderChildren();
-      renderPresences();
+      renderList();
       renderMissionDay();
       document.getElementById("camp-name").value = state.camp.name||"";
       document.getElementById("camp-start").value = state.camp.start||"";
@@ -1024,8 +1019,7 @@ document.getElementById("btn-reset").addEventListener("click", ()=>{
   if(!confirm("Dernière confirmation : es-tu sûr(e) ? Pense à exporter une sauvegarde avant si besoin.")) return;
   state = { children:[], presences:{}, camp:{name:"",start:"",end:""} };
   saveData();
-  renderChildren();
-  renderPresences();
+  renderList();
   renderMissionDay();
   document.getElementById("camp-name").value = "";
   document.getElementById("camp-start").value = "";
@@ -1044,7 +1038,8 @@ document.getElementById("btn-print-all").addEventListener("click", ()=>{
       <h2>${escapeHtml(c.prenom)} ${escapeHtml(c.nom)}</h2>
       <div class="print-row"><b>Groupe :</b> ${escapeHtml(c.groupe||"—")}</div>
       <div class="print-row"><b>Date de naissance :</b> ${c.naissance?formatDateFR(c.naissance):"—"}</div>
-      <div class="print-row"><b>Contact d'urgence :</b> ${escapeHtml(c.contactNom||"—")} ${c.contactTel?"· "+escapeHtml(c.contactTel):""}</div>
+      <div class="print-row"><b>Contact 1 :</b> ${escapeHtml(c.contact1Nom||"—")} ${c.contact1Tel?"· "+escapeHtml(c.contact1Tel):""}</div>
+      <div class="print-row"><b>Contact 2 :</b> ${escapeHtml(c.contact2Nom||"—")} ${c.contact2Tel?"· "+escapeHtml(c.contact2Tel):""}</div>
       <div class="print-row"><b>Régime alimentaire :</b> ${escapeHtml(c.regime||"Aucun signalé")}</div>
       <div class="print-row"><b>Vaccinations à jour :</b> ${c.vaccins==="oui"?"Oui":c.vaccins==="non"?"Non":"Non renseigné"}</div>
       <div class="print-row"><b>Traitement en cours :</b> ${escapeHtml(c.traitement||"Aucun")}</div>
@@ -1058,8 +1053,7 @@ document.getElementById("btn-print-all").addEventListener("click", ()=>{
 /* ============================================================
    Initialisation
    ============================================================ */
-renderChildren();
-renderPresences();
+renderList();
 renderMissionDay();
 </script>
 </body>
