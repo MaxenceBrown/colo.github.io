@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carnet de colo — Suivi des enfants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Barre latérale -->
+  <aside class="side">
+    <div class="side-top">
+      <span class="brand-mark">⛺</span>
+      <h1 class="brand">Carnet<br>de colo</h1>
+    </div>
+    <nav class="side-nav">
+      <button class="nav-btn is-active" data-view="enfants">
+        <span class="nav-num">01</span> Enfants
+      </button>
+      <button class="nav-btn" data-view="presences">
+        <span class="nav-num">02</span> Présences
+      </button>
+      <button class="nav-btn" data-view="reglages">
+        <span class="nav-num">03</span> Séjour &amp; export
+      </button>
+    </nav>
+    <div class="side-bottom">
+      <p class="side-note">Toutes les données restent dans ce navigateur. Pense à exporter régulièrement une sauvegarde.</p>
+    </div>
+  </aside>
+
+  <!-- Contenu principal -->
+  <main class="main">
+
+    <!-- VUE ENFANTS -->
+    <section id="view-enfants" class="view is-active">
+      <header class="view-head">
+        <div>
+          <p class="eyebrow">Fiches individuelles</p>
+          <h2>Les enfants du séjour</h2>
+        </div>
+        <button class="btn btn-primary" id="btn-add-child">+ Ajouter un enfant</button>
+      </header>
+
+      <div class="toolbar">
+        <input type="search" id="search-child" placeholder="Rechercher un nom, un groupe...">
+        <label class="filter-check">
+          <input type="checkbox" id="filter-allergies">
+          Allergies / PAI uniquement
+        </label>
+      </div>
+
+      <div id="children-grid" class="children-grid"></div>
+      <p id="empty-state" class="empty-state">Aucun enfant enregistré pour l'instant. Ajoute la première fiche avec le bouton ci-dessus.</p>
+    </section>
+
+    <!-- VUE PRESENCES -->
+    <section id="view-presences" class="view">
+      <header class="view-head">
+        <div>
+          <p class="eyebrow">Feuille du jour</p>
+          <h2>Présences</h2>
+        </div>
+        <div class="date-picker">
+          <button id="date-prev" class="btn btn-ghost" aria-label="Jour précédent">←</button>
+          <input type="date" id="presence-date">
+          <button id="date-next" class="btn btn-ghost" aria-label="Jour suivant">→</button>
+        </div>
+      </header>
+      <p class="hint">Coche les enfants présents. Un enfant non coché est marqué absent pour cette date.</p>
+      <div id="presence-summary" class="presence-summary"></div>
+      <div id="presence-list" class="presence-list"></div>
+    </section>
+
+    <!-- VUE REGLAGES / EXPORT -->
+    <section id="view-reglages" class="view">
+      <header class="view-head">
+        <div>
+          <p class="eyebrow">Paramètres</p>
+          <h2>Séjour &amp; export</h2>
+        </div>
+      </header>
+
+      <div class="settings-grid">
+        <div class="card-block">
+          <h3>Informations du séjour</h3>
+          <label>Nom du séjour
+            <input type="text" id="camp-name" placeholder="Colo été 2026 — Les Sapins">
+          </label>
+          <div class="row-2">
+            <label>Date de début
+              <input type="date" id="camp-start">
+            </label>
+            <label>Date de fin
+              <input type="date" id="camp-end">
+            </label>
+          </div>
+          <button class="btn btn-primary" id="btn-save-camp">Enregistrer</button>
+        </div>
+
+        <div class="card-block">
+          <h3>Sauvegarde des données</h3>
+          <p class="hint">Les données ne vivent que dans ce navigateur. Exporte un fichier de sauvegarde régulièrement, surtout avant de changer d'appareil.</p>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-export">Exporter (.json)</button>
+            <label class="btn btn-ghost" for="import-file">Importer un fichier</label>
+            <input type="file" id="import-file" accept="application/json" hidden>
+          </div>
+          <button class="btn btn-danger" id="btn-reset">Effacer toutes les données</button>
+        </div>
+
+        <div class="card-block">
+          <h3>Impression</h3>
+          <p class="hint">Génère les fiches sanitaires de tous les enfants, prêtes à imprimer pour l'équipe d'encadrement.</p>
+          <button class="btn btn-primary" id="btn-print-all">Imprimer toutes les fiches</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODALE FICHE ENFANT -->
+<div id="modal-child" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Fiche enfant</h3>
+      <button class="modal-close" id="modal-close" aria-label="Fermer">✕</button>
+    </div>
+    <form id="child-form" class="modal-body">
+      <input type="hidden" id="child-id">
+
+      <fieldset>
+        <legend>Identité</legend>
+        <div class="row-2">
+          <label>Prénom *
+            <input type="text" id="f-prenom" required>
+          </label>
+          <label>Nom *
+            <input type="text" id="f-nom" required>
+          </label>
+        </div>
+        <div class="row-2">
+          <label>Date de naissance
+            <input type="date" id="f-naissance">
+          </label>
+          <label>Groupe / tranche d'âge
+            <input type="text" id="f-groupe" placeholder="ex. Les Marmottes">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Contact d'urgence</legend>
+        <div class="row-2">
+          <label>Nom du contact
+            <input type="text" id="f-contact-nom">
+          </label>
+          <label>Téléphone
+            <input type="tel" id="f-contact-tel">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset-alert">
+        <legend>Santé — allergies &amp; PAI</legend>
+        <label class="checkbox-line">
+          <input type="checkbox" id="f-has-allergie">
+          Allergie(s) connue(s) ou Projet d'Accueil Individualisé (PAI)
+        </label>
+        <label>Détails (allergies, traitement, PAI, conduite à tenir)
+          <textarea id="f-allergie-detail" rows="3" placeholder="ex. Allergie arachide — trousse d'urgence dans le sac à dos, PAI signé par les parents"></textarea>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Autres informations santé</legend>
+        <label>Traitement médical en cours
+          <textarea id="f-traitement" rows="2"></textarea>
+        </label>
+        <label>Régime alimentaire particulier
+          <input type="text" id="f-regime">
+        </label>
+        <label>Vaccinations à jour ?
+          <select id="f-vaccins">
+            <option value="oui">Oui</option>
+            <option value="non">Non</option>
+            <option value="ne-sait-pas">Je ne sais pas</option>
+          </select>
+        </label>
+        <label>Remarques complémentaires
+          <textarea id="f-notes" rows="2"></textarea>
+        </label>
+      </fieldset>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btn-delete-child">Supprimer cette fiche</button>
+        <div class="modal-actions-right">
+          <button type="button" class="btn btn-ghost" id="btn-cancel">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer la fiche</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ZONE D'IMPRESSION (générée dynamiquement) -->
+<div id="print-area"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
